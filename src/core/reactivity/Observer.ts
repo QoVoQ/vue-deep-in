@@ -1,7 +1,6 @@
 import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
-import {def} from "src/util";
-import {ObserveOnSubscriber} from "rxjs/internal/operators/observeOn";
+import {def} from "src/shared/util";
 class Observer {
   dep: Dep;
   constructor(public value) {

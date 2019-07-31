@@ -1,4 +1,12 @@
-import {def, makeMap} from "./util";
+import {
+  def,
+  makeMap,
+  isDef,
+  isObject,
+  isPlainObject,
+  isPrimitive,
+  camelize
+} from "./util";
 
 describe("shared/util.def", () => {
   const key = "name";
@@ -39,5 +47,61 @@ describe("shared/util.makeMap", () => {
     const fn = makeMap(sampleInput, true);
 
     expect(fn("A")).toBe(true);
+  });
+});
+
+describe("shared/util.camelize", () => {
+  it("normal case: hello-world-mate", () => {
+    expect(camelize("hello-world-mate")).toBe("helloWorldMate");
+  });
+
+  it("not cameliable: hello", () => {
+    expect(camelize("hello")).toBe("hello");
+  });
+});
+
+describe("shared/util.assertions:", () => {
+  function assertionTestCaseFactory(fnToTest: Function) {
+    return (param, desc: string, expectRes: boolean) =>
+      it(`test on '${desc}' should be ${JSON.stringify(expectRes)}`, () => {
+        expect(fnToTest(param)).toBe(expectRes);
+      });
+  }
+  describe("shared/util.isDef", () => {
+    const fn = assertionTestCaseFactory(isDef);
+    fn(null, "null", false);
+    fn(undefined, "undefined", false);
+    fn("", "empty string", true);
+    fn({}, "object", true);
+  });
+
+  describe("shared/util.isObject", () => {
+    const fn = assertionTestCaseFactory(isObject);
+
+    fn(null, "null", false);
+    fn("", "empty string", false);
+    fn(1, "number", false);
+    fn({}, "object", true);
+  });
+
+  describe("shared/util.isPlainObject", () => {
+    const fn = assertionTestCaseFactory(isPlainObject);
+
+    fn(null, "null", false);
+    fn("", "empty string", false);
+    fn(1, "number", false);
+    fn(new Date(), "Date object", false);
+    fn({}, "object", true);
+  });
+
+  describe("shared/util.isPrimitive", () => {
+    const fn = assertionTestCaseFactory(isPrimitive);
+
+    fn(null, "null", false);
+    fn(undefined, "undefined", false);
+    fn(0, "number 0", true);
+    fn("Tom", "string Tom", true);
+    fn(true, "boolean true", true);
+    fn(Symbol("23"), "symbol", true);
   });
 });
