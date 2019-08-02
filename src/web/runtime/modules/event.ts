@@ -11,13 +11,9 @@ function add(name: string, handler: Function) {
   target.addEventListener(name, handler);
 }
 
-type removeListener = (
-  name: string,
-  fn: Function,
-  target?: HTMLElement
-) => void;
+type removeListener = (name: string, fn: Function, target?: Element) => void;
 
-function remove(name: string, handler: Function, _target?: HTMLElement) {
+function remove(name: string, handler: Function, _target?: Element) {
   (_target || target).removeEventListener(name, handler);
 }
 

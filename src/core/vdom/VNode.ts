@@ -4,6 +4,13 @@ interface IFnToInvoke extends Function {
   handler: Function;
 }
 
+interface IComponentOptions {
+  Ctor: new () => Component;
+  propsData?: Object;
+  listeners?: Object;
+  children?: Array<VNode>;
+  tag?: string;
+}
 interface IDOMListener {
   handler: Function;
 
@@ -29,6 +36,8 @@ interface IVNodeData {
 
   on?: {[key: string]: IDOMListener};
   props?: object;
+
+  hook?: {[key: string]: Function};
 }
 class VNode {
   tag?: string;
@@ -36,7 +45,7 @@ class VNode {
 
   children?: Array<VNode>;
 
-  elm?: Node;
+  elm?: Element;
 
   key?: string;
 
@@ -50,12 +59,13 @@ class VNode {
   isCloned?: boolean;
 
   componentInstance?: Component;
+  componentOptions?: IComponentOptions;
   constructor(
     tag?: string,
     data?: IVNodeData,
     children?: Array<VNode>,
     text?: string,
-    elm?: Node,
+    elm?: Element,
     context?: Component
   ) {
     this.key = this.data && this.data.key;
@@ -85,7 +95,7 @@ class VNode {
   }
 }
 
-function createEmptyVNode(text: string) {
+function createEmptyVNode(text: string = "") {
   const node = new VNode();
   node.text = text;
   node.isComment = true;

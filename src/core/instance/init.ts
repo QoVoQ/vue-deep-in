@@ -1,4 +1,4 @@
-import Vue, {componentOptions, Component} from ".";
+import Vue, {IComponentOptions, Component} from ".";
 import {initEvents} from "./events";
 import {initLifecycle, callHook, ComponentLifecycleName} from "./lifecycle";
 import {initRender} from "./render";
@@ -6,9 +6,12 @@ import {initState} from "./state";
 
 let uid = 0;
 export function initMixin(ctor: typeof Vue) {
-  ctor.prototype._init = function(opt: componentOptions) {
+  ctor.prototype._init = function(opt: IComponentOptions) {
     const vm: Component = this;
-    vm.$options = opt;
+    vm.$options = {
+      ...opt,
+      data: () => opt.data.apply(vm)
+    };
     vm._uid = uid++;
 
     vm._self = vm;

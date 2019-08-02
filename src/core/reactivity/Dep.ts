@@ -36,4 +36,16 @@ class Dep {
   }
 }
 
-export {Dep};
+const targetStack = [];
+
+function pushTarget(target?: Watcher) {
+  targetStack.push(target);
+  Dep.target = target;
+}
+
+function popTarget() {
+  targetStack.pop();
+  Dep.target = targetStack[targetStack.length - 1];
+}
+
+export {Dep, pushTarget, popTarget};

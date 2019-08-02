@@ -1,6 +1,7 @@
 import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
 import {def} from "src/shared/util";
+
 class Observer {
   dep: Dep;
   constructor(public value) {
@@ -34,6 +35,7 @@ function defineReactivity(target, key, value) {
     get() {
       dep.depend();
       childOb && childOb.dep.depend();
+      // @todo dependArray
       return value;
     },
 
@@ -67,7 +69,44 @@ function observeArray(val) {
   }
 }
 
-export {Observer, observeArray};
+function set(target: object, key: string | number, val: any): any {
+  if (Array.isArray(target)) {
+    target.splice(Number(key), 1, val);
+    return val;
+  }
+
+  if (target.hasOwnProperty(key)) {
+    target[key] = val;
+    return val;
+  }
+  const ob = observe(target);
+  if (!ob) {
+    target[key] = val;
+    return val;
+  }
+  defineReactivity(target, key, val);
+  ob.dep.notify();
+  return val;
+}
+
+function del(target: object, key: string | number) {
+  if (Array.isArray(target)) {
+    target.splice(Number(key), 1);
+  }
+
+  if (target.hasOwnProperty(key)) {
+    return;
+  }
+  const ob = observe(target);
+
+  delete target[key];
+
+  if (ob) {
+    ob.dep.notify();
+  }
+}
+
+export {Observer, observeArray, defineReactivity, observe, set, del};
 
 /**
  * const obj = { name: "Tom" }

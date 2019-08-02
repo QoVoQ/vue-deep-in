@@ -343,80 +343,13 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
     // invoke hook postpatch
   }
 
-  let hydrationBailed = false;
   // list of modules that can skip create hook during hydration because they
   // are already rendered on the client or has no need for initialization
   // Note: style is excluded because it relies on initial clone for future
   // deep updates (#7063).
   const isRenderedModule = makeMap("attrs,class,staticClass,staticStyle,key");
 
-  // Note: this is a browser-only function so we can assume elms are DOM nodes.
-  function hydrate(elm: Node, vnode: VNode, insertedVnodeQueue: Array<VNode>) {
-    let i;
-    const {tag, data, children} = vnode;
-    vnode.elm = elm;
-
-    // invoke hook init
-    // initComponent
-
-    if (isDef(tag)) {
-      if (isDef(children)) {
-        // empty element, allow client to pick up and populate children
-        if (!elm.hasChildNodes()) {
-          createChildren(vnode, children, insertedVnodeQueue);
-        } else {
-          // v-html and domProps: innerHTML
-          if (
-            isDef((i = data)) &&
-            isDef((i = i.domProps)) &&
-            isDef((i = i.innerHTML))
-          ) {
-            if (i !== elm.innerHTML) {
-              return false;
-            }
-          } else {
-            // iterate and compare children lists
-            let childrenMatch = true;
-            let childNode = elm.firstChild;
-            for (let i = 0; i < children.length; i++) {
-              if (
-                !childNode ||
-                !hydrate(childNode, children[i], insertedVnodeQueue)
-              ) {
-                childrenMatch = false;
-                break;
-              }
-              childNode = childNode.nextSibling;
-            }
-            // if childNode is not null, it means the actual childNodes list is
-            // longer than the virtual children list.
-            if (!childrenMatch || childNode) {
-              return false;
-            }
-          }
-        }
-      }
-      // if (isDef(data)) {
-      //   let fullInvoke = false;
-      //   for (const key in data) {
-      //     if (!isRenderedModule(key)) {
-      //       fullInvoke = true;
-      //       invokeCreateHooks(vnode, insertedVnodeQueue);
-      //       break;
-      //     }
-      //   }
-      //   if (!fullInvoke && data["class"]) {
-      //     // ensure collecting deps for deep class bindings for future updates
-      //     traverse(data["class"]);
-      //   }
-      // }
-    } else if (elm.data !== vnode.text) {
-      elm.data = vnode.text;
-    }
-    return true;
-  }
-
-  return function patch(oldVnode: VNode | Node, vnode: VNode, hydrating) {
+  return function patch(oldVnode: VNode | Element, vnode: VNode) {
     if (!isDef(vnode)) {
       if (isDef(oldVnode)) {
         //invoke hook destroy
@@ -435,20 +368,14 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
       const isRealElement = isDef(oldVnode.nodeType);
       if (!isRealElement && sameVNode(oldVnode, vnode)) {
         // patch existing root node
-        patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null);
+        patchVnode(oldVnode as VNode, vnode, insertedVnodeQueue, null, null);
       } else {
         if (isRealElement) {
           // mounting to a real element
 
-          if (hydrating) {
-            if (hydrate(oldVnode, vnode, insertedVnodeQueue)) {
-              // invokeInsertHook(vnode, insertedVnodeQueue, true);
-              return oldVnode;
-            }
-          }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
-          oldVnode = emptyNodeAt(oldVnode);
+          oldVnode = emptyNodeAt(<Element>oldVnode);
         }
 
         // replacing existing element
@@ -495,7 +422,7 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          removeVnodes([oldVnode], 0, 0);
+          removeVnodes([oldVnode as VNode], 0, 0);
         } else if (isDef(oldVnode.tag)) {
           // invokeDestroyHook(oldVnode);
         }

@@ -1,5 +1,5 @@
 class NodeOps {
-  static createElement(tagName: string): HTMLElement {
+  static createElement(tagName: string): Element {
     return document.createElement(tagName);
   }
 

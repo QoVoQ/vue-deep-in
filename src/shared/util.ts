@@ -60,6 +60,15 @@ export function toArray(list: any, start?: number): Array<any> {
   return ret;
 }
 
+export function noop() {}
+export function remove(arr: Array<any>, item: any): Array<any> | void {
+  if (arr.length) {
+    const index = arr.indexOf(item);
+    if (index > -1) {
+      return arr.splice(index, 1);
+    }
+  }
+}
 /**
  * Merge an Array of Objects into a single Object.
  */

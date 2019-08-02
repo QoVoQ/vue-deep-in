@@ -39,8 +39,11 @@ export function eventsMixin(ctor: typeof Vue) {
     eventQue.push(handler);
   };
 
-  ctor.prototype.$off = function(name: string, handler?: Function) {
+  ctor.prototype.$off = function(name?: string, handler?: Function) {
     const eventQue = this._events[name];
+    if (!isDef(name)) {
+      this._events = Object.create(null);
+    }
 
     if (!isDef(handler)) {
       this._events[name] = null;
