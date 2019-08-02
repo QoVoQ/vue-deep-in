@@ -3,6 +3,7 @@
 import {isDef} from "src/shared/util";
 import {updateListeners} from "src/core/vdom/helpers/update-listeners";
 import {VNode} from "src/core/vdom/VNode";
+import {VNodeHookNames} from ".";
 // @todo: why use a local target?
 let target: any;
 type addListener = (name: string, fn: Function) => void;
@@ -29,8 +30,8 @@ function updateDOMListeners(oldVnode: VNode, vnode: VNode) {
 }
 
 export default {
-  create: updateDOMListeners,
-  update: updateDOMListeners
+  [VNodeHookNames.create]: updateDOMListeners,
+  [VNodeHookNames.update]: updateDOMListeners
 };
 
 export {addListener, removeListener};

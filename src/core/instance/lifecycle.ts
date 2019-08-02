@@ -22,75 +22,73 @@ export function setActiveInstance(vm: Component) {
     activeInstance = prevActiveInstance;
   };
 }
-export function lifecycleMixin(ctor: typeof Vue) {
-  ctor.prototype._update = function(vnode: VNode) {
-    const vm: Component = this;
-    const prevVnode = vm._vnode;
-    const restoreActiveInstance = setActiveInstance(vm);
-    vm._vnode = vnode;
-    // Vue.prototype.__patch__ is injected in entry points
-    // based on the rendering backend used.
-    if (!prevVnode) {
-      // initial render
-      vm.$el = vm.__patch__(vm.$el, vnode);
-    } else {
-      // updates
-      vm.$el = vm.__patch__(prevVnode, vnode);
-    }
-    restoreActiveInstance();
+export const vueProto_update = function(vnode: VNode) {
+  const vm: Component = this;
+  const prevVnode = vm._vnode;
+  const restoreActiveInstance = setActiveInstance(vm);
+  vm._vnode = vnode;
+  // Vue.prototype.__patch__ is injected in entry points
+  // based on the rendering backend used.
+  if (!prevVnode) {
+    // initial render
+    vm.$el = vm.__patch__(vm.$el, vnode) as Element;
+  } else {
+    // updates
+    vm.$el = vm.__patch__(prevVnode, vnode) as Element;
+  }
+  restoreActiveInstance();
 
-    // @TODO don't know why
-    // if parent is an HOC, update its $el as well
-    if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
-      vm.$parent.$el = vm.$el;
-    }
-    // updated hook is called by the scheduler to ensure that children are
-    // updated in a parent's updated hook.
-  };
+  // @TODO don't know why
+  // if parent is an HOC, update its $el as well
+  if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
+    vm.$parent.$el = vm.$el;
+  }
+  // updated hook is called by the scheduler to ensure that children are
+  // updated in a parent's updated hook.
+};
 
-  ctor.prototype.$forceUpdate = function() {
-    const vm: Component = this;
-    if (vm._watcher) {
-      vm._watcher.update();
-    }
-  };
+export const vueProto$forceUpdate = function() {
+  const vm: Component = this;
+  if (vm._watcher) {
+    vm._watcher.update();
+  }
+};
 
-  ctor.prototype.$destroy = function() {
-    const vm: Component = this;
-    if (vm._isBeingDestroyed) {
-      return;
-    }
-    callHook(vm, ComponentLifecycleName.beforeDestroy);
-    vm._isBeingDestroyed = true;
-    // remove self from parent
-    const parent = vm.$parent;
-    if (parent && !parent._isBeingDestroyed) {
-      remove(parent.$children, vm);
-    }
-    // teardown watchers
-    if (vm._watcher) {
-      vm._watcher.teardown();
-    }
-    let i = vm._watchers.length;
-    while (i--) {
-      vm._watchers[i].teardown();
-    }
+export const vueProto$destroy = function() {
+  const vm: Component = this;
+  if (vm._isBeingDestroyed) {
+    return;
+  }
+  callHook(vm, ComponentLifecycleName.beforeDestroy);
+  vm._isBeingDestroyed = true;
+  // remove self from parent
+  const parent = vm.$parent;
+  if (parent && !parent._isBeingDestroyed) {
+    remove(parent.$children, vm);
+  }
+  // teardown watchers
+  if (vm._watcher) {
+    vm._watcher.teardown();
+  }
+  let i = vm._watchers.length;
+  while (i--) {
+    vm._watchers[i].teardown();
+  }
 
-    // call the last hook...
-    vm._isDestroyed = true;
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null);
-    // fire destroyed hook
-    callHook(vm, ComponentLifecycleName.destroyed);
-    // turn off all instance listeners.
-    vm.$off();
+  // call the last hook...
+  vm._isDestroyed = true;
+  // invoke destroy hooks on current rendered tree
+  vm.__patch__(vm._vnode, null);
+  // fire destroyed hook
+  callHook(vm, ComponentLifecycleName.destroyed);
+  // turn off all instance listeners.
+  vm.$off();
 
-    // release circular reference (#6759)
-    if (vm.$vnode) {
-      vm.$vnode.parent = null;
-    }
-  };
-}
+  // release circular reference (#6759)
+  if (vm.$vnode) {
+    vm.$vnode.parent = null;
+  }
+};
 
 export function initLifecycle(vm: Component) {
   const options = vm.$options;

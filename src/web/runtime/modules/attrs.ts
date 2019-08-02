@@ -2,7 +2,8 @@
 import {isDef} from "src/shared/util";
 
 import {VNode} from "src/core/vdom/VNode";
-import {isBooleanAttr, isFalsyAttrValue} from "src/web/util";
+import {isFalsyAttrValue} from "src/web/util";
+import {VNodeHookNames} from ".";
 
 function updateAttrs(oldVnode: VNode, vnode: VNode) {
   if (!isDef(oldVnode.data.attrs) && !isDef(vnode.data.attrs)) {
@@ -42,6 +43,6 @@ function setAttr(el: Element, key: string, value: any) {
 }
 
 export default {
-  create: updateAttrs,
-  update: updateAttrs
+  [VNodeHookNames.create]: updateAttrs,
+  [VNodeHookNames.update]: updateAttrs
 };

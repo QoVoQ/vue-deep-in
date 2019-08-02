@@ -4,45 +4,43 @@ import {warn} from "src/shared/debug";
 import {createElement} from "../vdom/create-element";
 import {defineReactivity} from "../reactivity";
 
-export function renderMixin(ctor: typeof Vue) {
-  ctor.prototype.$nextTick = function(fn: Function) {
-    //@ TODO
-    return fn.call(this);
-  };
+export function vueProto$nextTick(fn: Function) {
+  //@ TODO
+  return fn.call(this);
+}
 
-  ctor.prototype._render = function(): VNode {
-    const vm: Component = this;
-    const {render, _parentVNode} = vm.$options;
+export function vueProto_render(): VNode {
+  const vm: Component = this;
+  const {render, _parentVNode} = vm.$options;
 
-    // set parent vnode. this allows render functions to have access
-    // to the data on the placeholder node.
-    // like vnode tag <component-son-1 />
-    vm.$vnode = _parentVNode;
-    // render self
-    let vnode;
-    try {
-      vnode = render.call(vm, vm.$createElement);
-    } catch (e) {
-      warn(
-        `Exception in component(${vm.$options.name})'s render function: `,
-        vm,
-        e
-      );
-      vnode = vm._vnode;
-    }
-    // if the returned array contains only a single node, allow it
-    if (Array.isArray(vnode) && vnode.length === 1) {
-      vnode = vnode[0];
-    }
-    // return empty vnode in case the render function errored out
-    if (!(vnode instanceof VNode)) {
-      warn("Abnormal nodes returned from render function.", vm);
-      vnode = createEmptyVNode();
-    }
-    // set parent
-    vnode.parent = _parentVNode;
-    return vnode;
-  };
+  // set parent vnode. this allows render functions to have access
+  // to the data on the placeholder node.
+  // like vnode tag <component-son-1 />
+  vm.$vnode = _parentVNode;
+  // render self
+  let vnode;
+  try {
+    vnode = render.call(vm, vm.$createElement);
+  } catch (e) {
+    warn(
+      `Exception in component(${vm.$options.name})'s render function: `,
+      vm,
+      e
+    );
+    vnode = vm._vnode;
+  }
+  // if the returned array contains only a single node, allow it
+  if (Array.isArray(vnode) && vnode.length === 1) {
+    vnode = vnode[0];
+  }
+  // return empty vnode in case the render function error out
+  if (!(vnode instanceof VNode)) {
+    warn("Abnormal nodes returned from render function.", vm);
+    vnode = createEmptyVNode();
+  }
+  // set parent
+  vnode.parent = _parentVNode;
+  return vnode;
 }
 
 export function initRender(vm: Component) {
@@ -55,7 +53,7 @@ export function initRender(vm: Component) {
   vm.$createElement = (a, b, c) => createElement(vm, a, b, c);
 
   // $attrs & $listeners are exposed for easier HOC creation.
-  // they need to be reactive so that HOCs using them are always updated
+  // they need to be reactive so that HOC using them are always updated
   const parentData = parentVnode && parentVnode.data;
 
   defineReactivity(vm, "$attrs", (parentData && parentData.attrs) || {});

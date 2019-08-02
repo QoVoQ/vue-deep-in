@@ -1,10 +1,11 @@
 import {VNode} from "./VNode";
 import {isDef, makeMap, isPrimitive} from "src/shared/util";
 import {NodeOps} from "src/web/runtime/NodeOps";
+import {VNodeModule, VNodeHookNames} from "src/web/runtime/modules";
 
 export const emptyNode = new VNode("", {}, []);
 
-function sameVNode(a, b) {
+function sameVNode(a: VNode, b: VNode) {
   return (
     a.key === b.key &&
     (a.tag === b.tag &&
@@ -32,8 +33,22 @@ function createKeyToOldIdx(children, beginIdx, endIdx) {
   return map;
 }
 
-export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
-  const {nodeOps} = backend;
+export function createPatchFunction(backend: {
+  modules: VNodeModule[];
+  nodeOps: typeof NodeOps;
+}) {
+  const {modules, nodeOps} = backend;
+
+  const moduleCbs = {};
+
+  Object.values(VNodeHookNames).forEach((hookName: VNodeHookNames) => {
+    moduleCbs[hookName] = [];
+    modules.forEach((md: VNodeModule) => {
+      if (isDef(md[hookName])) {
+        moduleCbs[hookName].push(md[hookName]);
+      }
+    });
+  });
 
   function emptyNodeAt(elm: Element) {
     return new VNode(
@@ -43,6 +58,16 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
       undefined,
       elm
     );
+  }
+
+  function createRmCb(childElm: Node, listeners: number) {
+    function remove() {
+      if (--remove.listeners === 0) {
+        removeNode(childElm);
+      }
+    }
+    remove.listeners = listeners;
+    return remove;
   }
 
   function removeNode(el: Node) {
@@ -80,6 +105,9 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
 
       createChildren(vnode, children, insertedVnodeQueue);
       // invoke create hook
+      if (isDef(vnode.data)) {
+        invokeCreateHooks(vnode, insertedVnodeQueue);
+      }
       insert(parentElm, vnode.elm, refElm);
     } else if (vnode.isComment) {
       vnode.elm = nodeOps.createComment(vnode.text);
@@ -102,6 +130,17 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
     }
   }
 
+  function invokeCreateHooks(vnode: VNode, insertedVnodeQueue: Array<VNode>) {
+    for (let i = 0; i < moduleCbs[VNodeHookNames.create].length; ++i) {
+      moduleCbs[VNodeHookNames.create][i](emptyNode, vnode);
+    }
+    const vnodeHook = vnode.data.hook;
+    if (isDef(vnodeHook)) {
+      if (isDef(vnodeHook.create)) vnodeHook.create(emptyNode, vnode);
+      if (isDef(vnodeHook.insert)) insertedVnodeQueue.push(vnode);
+    }
+  }
+
   function createChildren(vnode, children, insertedVnodeQueue) {
     if (Array.isArray(children)) {
       for (let i = 0; i < children.length; ++i) {
@@ -120,6 +159,13 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
         nodeOps.createTextNode(String(vnode.text))
       );
     }
+  }
+
+  function isPatchable(vnode) {
+    while (vnode.componentInstance) {
+      vnode = vnode.componentInstance._vnode;
+    }
+    return isDef(vnode.tag);
   }
 
   function addVnodes(
@@ -315,15 +361,22 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
 
     const elm = (vnode.elm = oldVnode.elm);
 
-    let i;
     const data = vnode.data;
     // invoke hook prepatch
 
     const oldCh = oldVnode.children;
     const ch = vnode.children;
-    if (isDef(data)) {
-      // invoke hook update
+
+    // invoke hook update
+    if (isDef(data) && isPatchable(vnode)) {
+      moduleCbs[VNodeHookNames.update].forEach(fn => {
+        fn(oldVnode, vnode);
+      });
+      if (isDef(data.hook) && isDef(data.hook.update)) {
+        data.hook.update(oldVnode, vnode);
+      }
     }
+
     if (!isDef(vnode.text)) {
       if (isDef(oldCh) && isDef(ch)) {
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue);
@@ -349,6 +402,10 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
   // deep updates (#7063).
   const isRenderedModule = makeMap("attrs,class,staticClass,staticStyle,key");
 
+  const checkNodeType = (node: VNode | Element) => {
+    const elm = node as Element;
+    return isDef(elm.nodeType);
+  };
   return function patch(oldVnode: VNode | Element, vnode: VNode) {
     if (!isDef(vnode)) {
       if (isDef(oldVnode)) {
@@ -365,21 +422,21 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
       isInitialPatch = true;
       createElm(vnode, insertedVnodeQueue);
     } else {
-      const isRealElement = isDef(oldVnode.nodeType);
-      if (!isRealElement && sameVNode(oldVnode, vnode)) {
+      const isRealElement = checkNodeType(oldVnode);
+      const mountPoint = oldVnode as Element;
+      let preVnode = oldVnode as VNode;
+      if (!isRealElement && sameVNode(preVnode, vnode)) {
         // patch existing root node
-        patchVnode(oldVnode as VNode, vnode, insertedVnodeQueue, null, null);
+        patchVnode(preVnode, vnode, insertedVnodeQueue, null, null);
       } else {
         if (isRealElement) {
           // mounting to a real element
 
-          // either not server-rendered, or hydration failed.
-          // create an empty node and replace it
-          oldVnode = emptyNodeAt(<Element>oldVnode);
+          preVnode = emptyNodeAt(mountPoint);
         }
 
         // replacing existing element
-        const oldElm = oldVnode.elm;
+        const oldElm = preVnode.elm;
         const parentElm = nodeOps.parentNode(oldElm);
 
         // create new node
@@ -422,8 +479,8 @@ export function createPatchFunction(backend: {nodeOps: typeof NodeOps}) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          removeVnodes([oldVnode as VNode], 0, 0);
-        } else if (isDef(oldVnode.tag)) {
+          removeVnodes([preVnode], 0, 0);
+        } else if (isDef(preVnode.tag)) {
           // invokeDestroyHook(oldVnode);
         }
       }

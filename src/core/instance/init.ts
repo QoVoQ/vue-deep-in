@@ -5,25 +5,23 @@ import {initRender} from "./render";
 import {initState} from "./state";
 
 let uid = 0;
-export function initMixin(ctor: typeof Vue) {
-  ctor.prototype._init = function(opt: IComponentOptions) {
-    const vm: Component = this;
-    vm.$options = {
-      ...opt,
-      data: () => opt.data.apply(vm)
-    };
-    vm._uid = uid++;
-
-    vm._self = vm;
-    initLifecycle(vm);
-    initEvents(vm);
-    initRender(vm);
-    callHook(vm, ComponentLifecycleName.beforeCreate);
-    initState(vm);
-    callHook(vm, ComponentLifecycleName.created);
-
-    if (vm.$options.el) {
-      vm.$mount(vm.$options.el);
-    }
+export const vueProto_init = function(opt: IComponentOptions) {
+  const vm: Component = this;
+  vm.$options = {
+    ...opt,
+    data: () => opt.data.apply(vm)
   };
-}
+  vm._uid = uid++;
+
+  vm._self = vm;
+  initLifecycle(vm);
+  initEvents(vm);
+  initRender(vm);
+  callHook(vm, ComponentLifecycleName.beforeCreate);
+  initState(vm);
+  callHook(vm, ComponentLifecycleName.created);
+
+  if (vm.$options.el) {
+    vm.$mount(vm.$options.el);
+  }
+};

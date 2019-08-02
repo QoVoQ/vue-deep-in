@@ -3,13 +3,14 @@
 import {getStyle, normalizeStyleBinding} from "src/web/util/style";
 import {cached, isDef} from "src/shared/util";
 import {VNode} from "src/core/vdom/VNode";
+import {VNodeHookNames} from ".";
 
 const cssVarRE = /^--/;
 const importantRE = /\s*!important$/;
 const setProp = (el, name, val) => {
   if (Array.isArray(val)) {
     // Support values array created by autoprefixer, e.g.
-    // {display: ["-webkit-box", "-ms-flexbox", "flex"]}
+    // {display: ["-webkit-box","flex"]}
     // Set them one by one, and the browser will only set those it can recognize
     for (let i = 0, len = val.length; i < len; i++) {
       el.style[name] = val[i];
@@ -37,7 +38,7 @@ function updateStyle(oldVnode: VNode, vnode: VNode) {
   const oldStaticStyle: any = oldData.staticStyle;
   const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {};
 
-  // if static style exists, stylebinding already merged into it when doing normalizeStyleData
+  // if static style exists, style binding already merged into it when doing normalizeStyleData
   const oldStyle = oldStaticStyle || oldStyleBinding;
 
   const style = normalizeStyleBinding(vnode.data.style) || {};
@@ -65,6 +66,6 @@ function updateStyle(oldVnode: VNode, vnode: VNode) {
 }
 
 export default {
-  create: updateStyle,
-  update: updateStyle
+  [VNodeHookNames.create]: updateStyle,
+  [VNodeHookNames.update]: updateStyle
 };

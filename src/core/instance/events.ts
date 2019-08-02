@@ -33,54 +33,52 @@ export function updateComponentListeners(
   target = null;
 }
 
-export function eventsMixin(ctor: typeof Vue) {
-  ctor.prototype.$on = function(name: string, handler: Function) {
-    const eventQue = this._events[name] || (this._events[name] = []);
-    eventQue.push(handler);
-  };
+export const vueProto$on = function(name: string, handler: Function) {
+  const eventQue = this._events[name] || (this._events[name] = []);
+  eventQue.push(handler);
+};
 
-  ctor.prototype.$off = function(name?: string, handler?: Function) {
-    const eventQue = this._events[name];
-    if (!isDef(name)) {
-      this._events = Object.create(null);
-    }
+export const vueProto$off = function(name?: string, handler?: Function) {
+  const eventQue = this._events[name];
+  if (!isDef(name)) {
+    this._events = Object.create(null);
+  }
 
-    if (!isDef(handler)) {
-      this._events[name] = null;
-      return;
-    }
+  if (!isDef(handler)) {
+    this._events[name] = null;
+    return;
+  }
 
-    if (!isDef(eventQue)) {
-      return;
-    }
+  if (!isDef(eventQue)) {
+    return;
+  }
 
-    const idx = eventQue.findIndex(handler);
-    if (idx === -1) {
-      return;
-    }
+  const idx = eventQue.findIndex(handler);
+  if (idx === -1) {
+    return;
+  }
 
-    eventQue.splice(idx, 1);
-  };
+  eventQue.splice(idx, 1);
+};
 
-  ctor.prototype.$emit = function(name: string, ...args: Array<any>) {
-    const eventQue = this._events[name];
+export const vueProto$emit = function(name: string, ...args: Array<any>) {
+  const eventQue = this._events[name];
 
-    if (!isDef(eventQue)) {
-      return;
-    }
+  if (!isDef(eventQue)) {
+    return;
+  }
 
-    eventQue.forEach(fn => {
-      invokeWithErrorHandler(fn, this, args);
-    });
-  };
+  eventQue.forEach(fn => {
+    invokeWithErrorHandler(fn, this, args);
+  });
+};
 
-  ctor.prototype.$once = function(name: string, handler: Function) {
-    const vm = this;
-    function once(...args) {
-      vm.$off(name, once);
-      invokeWithErrorHandler(handler, vm, args);
-    }
+export const vueProto$once = function(name: string, handler: Function) {
+  const vm = this;
+  function once(...args) {
+    vm.$off(name, once);
+    invokeWithErrorHandler(handler, vm, args);
+  }
 
-    this.$on(name, once);
-  };
-}
+  this.$on(name, once);
+};

@@ -45,7 +45,7 @@ class VNode {
 
   children?: Array<VNode>;
 
-  elm?: Element;
+  elm?: Element | Comment | Text;
 
   key?: string;
 

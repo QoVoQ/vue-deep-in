@@ -2,6 +2,7 @@ import {isDef} from "src/shared/util";
 
 import {genClassForVnode} from "src/web/util";
 import {IVNodeData} from "src/core/vdom/VNode";
+import {VNodeHookNames} from ".";
 
 function updateClass(oldVnode: any, vnode: any) {
   const el = vnode.elm;
@@ -25,6 +26,6 @@ function updateClass(oldVnode: any, vnode: any) {
 }
 
 export default {
-  create: updateClass,
-  update: updateClass
+  [VNodeHookNames.create]: updateClass,
+  [VNodeHookNames.update]: updateClass
 };

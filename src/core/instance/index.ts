@@ -8,20 +8,18 @@ type createElementFunction = (
 type renderFunction = (c: createElementFunction) => VNode;
 
 interface IComponentOptions {
-  _propKeys: any[];
+  _propKeys: string[];
   props: any;
   methods: {[key: string]: Function};
   computed: {[key: string]: Function};
   watch: {[key: string]: Function};
   name?: string;
   el?: Element;
-
   parent?: Component;
-  component?: object;
 
+  components?: object;
   propsData?: object;
   data?: () => object;
-  method?: {[key: string]: Function};
 
   [ComponentLifecycleName.beforeCreate]?: Function | Function[];
   [ComponentLifecycleName.created]?: Function | Function[];
@@ -38,17 +36,27 @@ interface IComponentOptions {
   // vm.$options._parentVNode, vm.$vnode, childVNode.parent
   // it has attributes 'componentInstance' and 'componentOptions'
   _parentVNode?: VNode;
-
-  _propsKeys: Array<string>;
 }
 type Component = Vue;
 
-import {initMixin} from "./init";
-import {stateMixin} from "./state";
-import {renderMixin} from "./render";
-import {eventsMixin} from "./events";
-import {lifecycleMixin, ComponentLifecycleName} from "./lifecycle";
-import {Watcher} from "../reactivity";
+import {vueProto_init} from "./init";
+import {vueProto$watch} from "./state";
+import {vueProto_render, vueProto$nextTick} from "./render";
+import {
+  vueProto$on,
+  vueProto$emit,
+  vueProto$off,
+  vueProto$once
+} from "./events";
+import {
+  ComponentLifecycleName,
+  vueProto$destroy,
+  vueProto_update,
+  vueProto$forceUpdate
+} from "./lifecycle";
+import {Watcher, set, del} from "../reactivity";
+import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
+import {warn} from "src/shared/debug";
 
 class Vue {
   _uid: number;
@@ -81,9 +89,22 @@ class Vue {
 
   $createElement?: Function;
 
-  $data?: object;
+  get $data() {
+    return this._data;
+  }
+  set $data(_) {
+    warn(
+      "Avoid replacing instance root $data. Use nested data properties instead."
+    );
+  }
 
-  $props?: object;
+  get $props() {
+    return this._props;
+  }
+
+  set $props(_) {
+    warn("$props is readonly");
+  }
   $el?: Element;
   $options?: IComponentOptions;
 
@@ -99,47 +120,30 @@ class Vue {
     this._init(opts);
   }
 
-  _init(opts: IComponentOptions) {}
+  _init = vueProto_init;
 
-  $on(eventName: string, handler: Function) {}
-  $off(eventName?: string, handler?: Function) {}
+  $on = vueProto$on;
+  $off = vueProto$off;
+  $emit = vueProto$emit;
+  $once = vueProto$once;
 
-  $emit(eventName: string, ...args: Array<any>) {}
-  $once(eventName: string, handler: Function) {}
+  $mount = vueProto$mount;
 
-  $mount(el?: Element) {}
+  _update = vueProto_update;
 
-  _update(vnode: VNode) {}
+  __patch__ = vueProto__patch__;
 
-  __patch__(oldNode: Element | VNode, newNode: VNode): Element {
-    return document.createElement("div");
-  }
+  _render = vueProto_render;
 
-  _render(): VNode {
-    return new VNode();
-  }
+  $nextTick = vueProto$nextTick;
+  $destroy = vueProto$destroy;
+  $forceUpdate = vueProto$forceUpdate;
 
-  $nextTick(fn: Function) {}
-  $destroy() {}
-  $forceUpdate() {}
+  $watch = vueProto$watch;
 
-  $watch(expOrFn: string | Function, handler: any, options: Object) {
-    throw new Error("Method not implemented.");
-  }
-
-  $set(target: object, key: string | number, val: any) {
-    throw new Error("Method not implemented.");
-  }
-  $delete(target: object, key: string | number) {
-    throw new Error("Method not implemented.");
-  }
+  $set = set;
+  $delete = del;
 }
-
-initMixin(Vue);
-stateMixin(Vue);
-eventsMixin(Vue);
-lifecycleMixin(Vue);
-renderMixin(Vue);
 
 export default Vue;
 

@@ -21,56 +21,31 @@ export function proxy(target: Object, sourceKey: string, key: string) {
   };
   Object.defineProperty(target, key, sharedPropertyDefinition);
 }
-export function stateMixin(ctor: typeof Vue) {
-  Object.defineProperty(ctor.prototype, "$data", {
-    get() {
-      return this._data;
-    },
-    set() {
-      warn(
-        "Avoid replacing instance root $data. Use nested data properties instead."
-      );
+
+/**
+ * this.$watch('name', (newVal, oldVal) => {}, opts)
+ */
+export const vueProto$watch = function(
+  expOrFn: string | Function,
+  cb: WatcherCallback,
+  options?: IWatcherOptions
+): Function {
+  const vm: Component = this;
+
+  options = options || {};
+  options.user = true;
+  const watcher = new Watcher(vm, expOrFn, cb, options);
+  if (options.immediate) {
+    try {
+      cb.call(vm, watcher.value);
+    } catch (error) {
+      warn(`callback for immediate watcher "${expOrFn}"`, error, vm);
     }
-  });
-  Object.defineProperty(ctor.prototype, "$props", {
-    get() {
-      return this._props;
-    },
-
-    set() {
-      warn("$props is readonly");
-    }
-  });
-
-  Vue.prototype.$set = set;
-  Vue.prototype.$delete = del;
-
-  /**
-   * this.$watch('name', (newVal, oldVal) => {}, opts)
-   */
-  Vue.prototype.$watch = function(
-    expOrFn: string | Function,
-    cb: WatcherCallback,
-    options?: IWatcherOptions
-  ): Function {
-    const vm: Component = this;
-
-    options = options || {};
-    options.user = true;
-    const watcher = new Watcher(vm, expOrFn, cb, options);
-    if (options.immediate) {
-      try {
-        cb.call(vm, watcher.value);
-      } catch (error) {
-        warn(`callback for immediate watcher "${expOrFn}"`, error, vm);
-      }
-    }
-    return function unwatchFn() {
-      watcher.teardown();
-    };
+  }
+  return function unwatchFn() {
+    watcher.teardown();
   };
-}
-
+};
 export function initState(vm: Component) {
   vm._watchers = [];
   const opts = vm.$options;
