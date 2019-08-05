@@ -1,8 +1,8 @@
 import {isDef} from "src/shared/util";
 
 import {genClassForVnode} from "src/web/util";
-import {IVNodeData} from "src/core/vdom/VNode";
-import {VNodeHookNames} from ".";
+import {IVNodeData} from "src/core/vdom/definition";
+import {VNodeHookNames} from "./definition";
 
 function updateClass(oldVnode: any, vnode: any) {
   const el = vnode.elm;

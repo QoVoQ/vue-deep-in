@@ -1,16 +1,16 @@
 import Vue, {Component} from ".";
 import {invokeWithErrorHandler} from "../util/error";
 import {VNode} from "../vdom/VNode";
-import {remove, noop} from "src/shared/util";
+import {remove, noop, isDef} from "src/shared/util";
 import {Watcher} from "../reactivity/Watcher";
 
 export enum ComponentLifecycleName {
-  beforeCreate = "BEFORE_CREATE",
-  created = "CREATED",
-  beforeMount = "BEFORE_MOUNT",
-  mounted = "MOUNTED",
-  beforeDestroy = "BEFORE_DESTROY",
-  destroyed = "DESTROYED"
+  beforeCreate = "beforeCreate",
+  created = "created",
+  beforeMount = "beforeMount",
+  mounted = "mounted",
+  beforeDestroy = "beforeDestroy",
+  destroyed = "destroyed"
 }
 
 export let activeInstance: any = null;
@@ -129,6 +129,9 @@ export function mountComponent(vm: Component, el?: Element): Component {
 }
 export function callHook(vm: Component, hookName: ComponentLifecycleName) {
   let fns = vm.$options[hookName];
+  if (!isDef(fns)) {
+    return;
+  }
   if (!Array.isArray(fns)) {
     fns = [fns];
   }

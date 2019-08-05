@@ -1,5 +1,6 @@
 import {cached, toObject} from "src/shared/util";
-import {IVNodeData, VNode} from "src/core/vdom/VNode";
+import {VNode} from "src/core/vdom/VNode";
+import {IVNodeData} from "src/core/vdom/definition";
 
 export const parseStyleText = cached(function(cssText) {
   const res = {};

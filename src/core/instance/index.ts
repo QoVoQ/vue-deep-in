@@ -1,20 +1,20 @@
-import {VNode, IDOMListener} from "../vdom/VNode";
+import {VNode} from "../vdom/VNode";
+import {IDOMListener} from "../vdom/definition";
 
 type createElementFunction = (
   tag: string,
   data: object,
-  children: Array<VNode>
+  children: Array<VNode | string>
 ) => VNode;
 type renderFunction = (c: createElementFunction) => VNode;
 
-interface IComponentOptions {
-  _propKeys: string[];
-  props: any;
-  methods: {[key: string]: Function};
-  computed: {[key: string]: Function};
-  watch: {[key: string]: Function};
+interface ICtorOptions {
+  props?: any;
+  methods?: {[key: string]: Function};
+  computed?: {[key: string]: Function};
+  watch?: {[key: string]: Function};
   name?: string;
-  el?: Element;
+  el?: Element | string;
   parent?: Component;
 
   components?: object;
@@ -28,7 +28,7 @@ interface IComponentOptions {
   [ComponentLifecycleName.beforeDestroy]?: Function | Function[];
   [ComponentLifecycleName.destroyed]?: Function | Function[];
   render: renderFunction;
-
+  _propKeys?: string[];
   _componentTagName?: string;
   _parentListeners?: {[key: string]: IDOMListener};
 
@@ -106,7 +106,7 @@ class Vue {
     warn("$props is readonly");
   }
   $el?: Element;
-  $options?: IComponentOptions;
+  $options?: ICtorOptions;
 
   $parent?: Component;
 
@@ -116,7 +116,7 @@ class Vue {
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 
-  constructor(opts: IComponentOptions) {
+  constructor(opts: ICtorOptions) {
     this._init(opts);
   }
 
@@ -147,4 +147,4 @@ class Vue {
 
 export default Vue;
 
-export {Vue, Component, IComponentOptions};
+export {Vue, Component, ICtorOptions};

@@ -1,4 +1,5 @@
-import {VNode, IVNodeData} from "src/core/vdom/VNode";
+import {VNode} from "src/core/vdom/VNode";
+import {IVNodeData} from "src/core/vdom/definition";
 import {isDef, isObject} from "src/shared/util";
 
 export function genClassForVnode(vnode: VNode): string {

@@ -1,8 +1,8 @@
 /* @flow */
 
-import {isDef, toNumber} from "src/shared/util";
+import {isDef} from "src/shared/util";
 import {VNode} from "src/core/vdom/VNode";
-import {VNodeHookNames} from ".";
+import {VNodeHookNames} from "./definition";
 
 function updateDOMProps(oldVnode: VNode, vnode: VNode) {
   if (!isDef(oldVnode.data.domProps) && !isDef(vnode.data.domProps)) {

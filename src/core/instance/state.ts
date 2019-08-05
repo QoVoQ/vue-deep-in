@@ -168,7 +168,7 @@ function initComputed(vm: Component, computed: ComputedFnMap) {
   const watchers = (vm._computedWatchers = Object.create(null));
 
   for (const key in computed) {
-    const getter = computed[key];
+    const getter = computed[key].bind(vm);
 
     watchers[key] = new Watcher(
       vm,

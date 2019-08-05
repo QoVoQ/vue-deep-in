@@ -8,7 +8,7 @@ import {VNodeOn} from "../vdom/VNode";
 export function initEvents(vm: Component) {
   vm._events = Object.create(null);
   // init listener
-  const listeners = this.$options._parentListeners;
+  const listeners = vm.$options._parentListeners;
   if (listeners) {
     updateComponentListeners(vm, listeners, undefined);
   }

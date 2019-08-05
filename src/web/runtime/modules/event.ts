@@ -3,7 +3,7 @@
 import {isDef} from "src/shared/util";
 import {updateListeners} from "src/core/vdom/helpers/update-listeners";
 import {VNode} from "src/core/vdom/VNode";
-import {VNodeHookNames} from ".";
+import {VNodeHookNames} from "./definition";
 // @todo: why use a local target?
 let target: any;
 type addListener = (name: string, fn: Function) => void;

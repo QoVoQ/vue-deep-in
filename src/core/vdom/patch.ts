@@ -1,7 +1,7 @@
 import {VNode} from "./VNode";
 import {isDef, makeMap, isPrimitive} from "src/shared/util";
 import {NodeOps} from "src/web/runtime/NodeOps";
-import {VNodeModule, VNodeHookNames} from "src/web/runtime/modules";
+import {VNodeModule, VNodeHookNames} from "src/web/runtime/modules/definition";
 
 export const emptyNode = new VNode("", {}, []);
 
@@ -110,10 +110,10 @@ export function createPatchFunction(backend: {
       }
       insert(parentElm, vnode.elm, refElm);
     } else if (vnode.isComment) {
-      vnode.elm = nodeOps.createComment(vnode.text);
+      vnode.elm = nodeOps.createComment(String(vnode.text));
       insert(parentElm, vnode.elm, refElm);
     } else {
-      vnode.elm = nodeOps.createTextNode(vnode.text);
+      vnode.elm = nodeOps.createTextNode(String(vnode.text));
       insert(parentElm, vnode.elm, refElm);
     }
   }

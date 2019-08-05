@@ -1,44 +1,7 @@
 import {Component} from "../instance";
+import {IVNodeData, IComponentOptions, IDOMListener} from "./definition";
+import {isPrimitive, toString} from "src/shared/util";
 
-interface IFnToInvoke extends Function {
-  handler: Function;
-}
-
-interface IComponentOptions {
-  Ctor: new () => Component;
-  propsData?: Object;
-  listeners?: Object;
-  children?: Array<VNode>;
-  tag?: string;
-}
-interface IDOMListener {
-  handler: Function;
-
-  fnToInvoke?: IFnToInvoke;
-}
-interface IVNodeData {
-  key?: string;
-
-  tag?: string;
-  class?: string;
-
-  staticClass?: string;
-  style?: object;
-
-  staticStyle?: string;
-
-  normalizedStyle?: object;
-  attrs?: {[key: string]: any};
-
-  domProps?: object;
-
-  nativeOn?: {[key: string]: Function};
-
-  on?: {[key: string]: IDOMListener};
-  props?: object;
-
-  hook?: {[key: string]: Function};
-}
 class VNode {
   tag?: string;
   data?: IVNodeData;
@@ -63,19 +26,28 @@ class VNode {
   constructor(
     tag?: string,
     data?: IVNodeData,
-    children?: Array<VNode>,
+    children?: Array<VNode | string>,
     text?: string,
-    elm?: Element,
+    elm?: Element | Text | Comment,
     context?: Component
   ) {
     this.key = this.data && this.data.key;
     this.tag = tag;
     this.data = data;
-    this.children = children || [];
     this.text = text;
     this.parent = undefined;
     this.elm = elm;
     this.context = context;
+    this.children = Array.isArray(children)
+      ? children.reduce((acc, cur) => {
+          if (isPrimitive(cur)) {
+            return acc.concat(
+              new VNode(undefined, undefined, undefined, toString(cur))
+            );
+          }
+          return acc.concat(cur);
+        }, [])
+      : undefined;
   }
 
   clone(): VNode {
@@ -110,7 +82,6 @@ type VNodeOn = {[key: string]: IDOMListener};
 
 export {
   IVNodeData,
-  IFnToInvoke,
   IDOMListener,
   VNode,
   createEmptyVNode,

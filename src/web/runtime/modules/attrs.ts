@@ -3,7 +3,7 @@ import {isDef} from "src/shared/util";
 
 import {VNode} from "src/core/vdom/VNode";
 import {isFalsyAttrValue} from "src/web/util";
-import {VNodeHookNames} from ".";
+import {VNodeHookNames} from "./definition";
 
 function updateAttrs(oldVnode: VNode, vnode: VNode) {
   if (!isDef(oldVnode.data.attrs) && !isDef(vnode.data.attrs)) {

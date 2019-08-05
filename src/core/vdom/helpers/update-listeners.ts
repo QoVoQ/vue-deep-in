@@ -1,5 +1,6 @@
 import {isDef} from "src/shared/util";
-import {VNodeOn, IDOMListener, IFnToInvoke} from "../VNode";
+import {VNodeOn} from "../VNode";
+import {IDOMListener, IFnToInvoke} from "../definition";
 import {addListener, removeListener} from "src/web/runtime/modules/event";
 import {Component} from "src/core/instance";
 

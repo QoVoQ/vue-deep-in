@@ -1,9 +1,9 @@
 /* @flow */
 
 import {getStyle, normalizeStyleBinding} from "src/web/util/style";
-import {cached, isDef} from "src/shared/util";
+import {isDef} from "src/shared/util";
 import {VNode} from "src/core/vdom/VNode";
-import {VNodeHookNames} from ".";
+import {VNodeHookNames} from "./definition";
 
 const cssVarRE = /^--/;
 const importantRE = /\s*!important$/;
