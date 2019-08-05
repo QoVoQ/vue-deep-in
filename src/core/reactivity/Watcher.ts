@@ -3,6 +3,9 @@ import {Component} from "../instance";
 import {remove} from "src/shared/util";
 import {isObject} from "util";
 import {warn} from "src/shared/debug";
+import {queueWatcher} from "./scheduler";
+
+let uid = 0;
 type WatcherCallback = (newValue: any, oldValue: any) => void;
 
 interface IWatcherOptions {
@@ -13,6 +16,7 @@ interface IWatcherOptions {
   lazy?: boolean;
 }
 class Watcher {
+  uid: number;
   value: any;
   getter: Function;
   target: Component;
@@ -33,6 +37,7 @@ class Watcher {
     options: IWatcherOptions = {},
     isRenderWatcher?: boolean
   ) {
+    this.uid = uid++;
     this.target = target;
     if (isRenderWatcher) {
       target._watcher = this;
@@ -90,7 +95,7 @@ class Watcher {
       this.dirty = true;
       return;
     }
-    this.run();
+    queueWatcher(this);
   }
 
   addDep(dep: Dep) {

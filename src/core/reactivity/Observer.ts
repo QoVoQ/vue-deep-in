@@ -35,7 +35,9 @@ function defineReactivity(target, key, value) {
     get() {
       dep.depend();
       childOb && childOb.dep.depend();
-      // @todo dependArray
+      if (Array.isArray(value)) {
+        dependArray(value);
+      }
       return value;
     },
 
@@ -50,7 +52,7 @@ function defineReactivity(target, key, value) {
   });
 }
 
-function observe(val) {
+function observe(val): Observer {
   if (typeof val !== "object") {
     return;
   }
@@ -67,6 +69,15 @@ function observeArray(val) {
   for (const ele of val) {
     observe(ele);
   }
+}
+
+function dependArray(arr: Array<any>) {
+  arr.forEach(ele => {
+    ele && ele.__ob__ && ele.__ob__.dep.depend();
+    if (Array.isArray(ele)) {
+      dependArray(ele);
+    }
+  });
 }
 
 function set(target: object, key: string | number, val: any): any {
