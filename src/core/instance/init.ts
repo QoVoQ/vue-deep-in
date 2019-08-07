@@ -26,3 +26,7 @@ export const vueProto_init = function(opt: ICtorOptions) {
     vm.$mount(vm.$options.el);
   }
 };
+
+export function initMixin(Ctor: typeof Vue) {
+  Ctor.prototype._init = vueProto_init;
+}

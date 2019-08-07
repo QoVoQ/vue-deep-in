@@ -39,20 +39,22 @@ interface ICtorOptions {
 }
 type Component = Vue;
 
-import {vueProto_init} from "./init";
-import {vueProto$watch} from "./state";
-import {vueProto_render, vueProto$nextTick} from "./render";
+import {vueProto_init, initMixin} from "./init";
+import {vueProto$watch, stateMixin} from "./state";
+import {vueProto_render, vueProto$nextTick, renderMixin} from "./render";
 import {
   vueProto$on,
   vueProto$emit,
   vueProto$off,
-  vueProto$once
+  vueProto$once,
+  eventsMixin
 } from "./events";
 import {
   ComponentLifecycleName,
   vueProto$destroy,
   vueProto_update,
-  vueProto$forceUpdate
+  vueProto$forceUpdate,
+  lifecycleMixin
 } from "./lifecycle";
 import {Watcher, set, del} from "../reactivity";
 import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
@@ -116,35 +118,45 @@ class Vue {
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 
-  constructor(opts: ICtorOptions) {
+  constructor(
+    opts: ICtorOptions = {
+      render() {
+        return null;
+      }
+    }
+  ) {
     this._init(opts);
   }
 
-  _init = vueProto_init;
+  _init: typeof vueProto_init;
 
-  $on = vueProto$on;
-  $off = vueProto$off;
-  $emit = vueProto$emit;
-  $once = vueProto$once;
+  $on: typeof vueProto$on;
+  $off: typeof vueProto$off;
+  $emit: typeof vueProto$emit;
+  $once: typeof vueProto$once;
 
-  $mount = vueProto$mount;
+  $mount: typeof vueProto$mount;
 
-  _update = vueProto_update;
+  _update: typeof vueProto_update;
 
-  __patch__ = vueProto__patch__;
+  __patch__: typeof vueProto__patch__;
 
-  _render = vueProto_render;
+  _render: typeof vueProto_render;
 
-  $nextTick = vueProto$nextTick;
-  $destroy = vueProto$destroy;
-  $forceUpdate = vueProto$forceUpdate;
+  $nextTick: typeof vueProto$nextTick;
+  $destroy: typeof vueProto$destroy;
+  $forceUpdate: typeof vueProto$forceUpdate;
 
-  $watch = vueProto$watch;
+  $watch: typeof vueProto$watch;
 
-  $set = set;
-  $delete = del;
+  $set: typeof set;
+  $delete: typeof del;
 }
-
+initMixin(Vue);
+eventsMixin(Vue);
+lifecycleMixin(Vue);
+renderMixin(Vue);
+stateMixin(Vue);
 export default Vue;
 
 export {Vue, Component, ICtorOptions};

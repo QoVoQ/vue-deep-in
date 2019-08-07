@@ -3,10 +3,10 @@ import {VNode, createEmptyVNode} from "../vdom/VNode";
 import {warn} from "src/shared/debug";
 import {createElement} from "../vdom/create-element";
 import {defineReactivity} from "../reactivity";
+import {nextTick} from "../util/next-tick";
 
-export function vueProto$nextTick(fn: Function) {
-  //@ TODO
-  return fn.call(this);
+export function vueProto$nextTick(fn?: Function) {
+  return nextTick(fn, this);
 }
 
 export function vueProto_render(): VNode {
@@ -41,6 +41,11 @@ export function vueProto_render(): VNode {
   // set parent
   vnode.parent = _parentVNode;
   return vnode;
+}
+
+export function renderMixin(Ctor: typeof Vue) {
+  Ctor.prototype.$nextTick = vueProto$nextTick;
+  Ctor.prototype._render = vueProto_render;
 }
 
 export function initRender(vm: Component) {

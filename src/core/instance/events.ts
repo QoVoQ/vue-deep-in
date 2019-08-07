@@ -14,6 +14,13 @@ export function initEvents(vm: Component) {
   }
 }
 
+export function eventsMixin(Ctor: typeof Vue) {
+  Ctor.prototype.$on = vueProto$on;
+  Ctor.prototype.$off = vueProto$off;
+  Ctor.prototype.$emit = vueProto$emit;
+  Ctor.prototype.$once = vueProto$once;
+}
+
 let target = null;
 
 const add: addListener = (name, fn) => {

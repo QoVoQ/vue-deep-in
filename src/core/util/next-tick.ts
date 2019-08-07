@@ -14,7 +14,7 @@ function flushQueue() {
   });
 }
 
-function nextTick(cb?: Function, ctx?: object) {
+function nextTick(cb?: Function, ctx?: object): Promise<any> | undefined {
   let _resolve;
   asyncJobQueue.push(() => {
     if (isDef(cb)) {

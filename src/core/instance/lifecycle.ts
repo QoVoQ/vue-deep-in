@@ -105,6 +105,12 @@ export function initLifecycle(vm: Component) {
   vm._isBeingDestroyed = false;
 }
 
+export function lifecycleMixin(Ctor: typeof Vue) {
+  Ctor.prototype._update = vueProto_update;
+  Ctor.prototype.$destroy = vueProto$destroy;
+  Ctor.prototype.$forceUpdate = vueProto$forceUpdate;
+}
+
 export function mountComponent(vm: Component, el?: Element): Component {
   vm.$el = el;
 

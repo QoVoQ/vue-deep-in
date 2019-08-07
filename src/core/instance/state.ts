@@ -63,6 +63,12 @@ export function initState(vm: Component) {
   }
 }
 
+export function stateMixin(Ctor: typeof Vue) {
+  Ctor.prototype.$set = set;
+  Ctor.prototype.$delete = del;
+  Ctor.prototype.$watch = vueProto$watch;
+}
+
 function initProps(vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {};
   const props = (vm._props = {});

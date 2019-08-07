@@ -406,7 +406,7 @@ export function createPatchFunction(backend: {
     const elm = node as Element;
     return isDef(elm.nodeType);
   };
-  return function patch(oldVnode: VNode | Element, vnode: VNode) {
+  return function patch(oldVnode?: VNode | Element, vnode?: VNode) {
     if (!isDef(vnode)) {
       if (isDef(oldVnode)) {
         //invoke hook destroy
