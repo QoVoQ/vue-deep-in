@@ -1,5 +1,6 @@
 import Vue, {ICtorOptions} from "src";
 import {VueClass} from "./definitions";
+import {mergeOptions} from "src/core/util/options";
 
 /**
  * because vue options like props, methods, computed, data can be access through
@@ -55,8 +56,7 @@ export function componentFactory(
   options: Partial<ICtorOptions> = {}
 ): VueClass<Vue> {
   const ctorProto = Ctor.prototype;
-
-  Object.keys(ctorProto).forEach(key => {
+  Object.getOwnPropertyNames(ctorProto).forEach(key => {
     if (key === "constructor") {
       return;
     }
@@ -99,7 +99,7 @@ export function componentFactory(
 
   return class extends Ctor {
     constructor(opt: Partial<ICtorOptions> = {}) {
-      super({...options, ...opt});
+      super(mergeOptions(options, opt));
     }
   };
 }

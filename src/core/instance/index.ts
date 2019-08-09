@@ -100,7 +100,7 @@ class Vue {
 
   $createElement?: createElementFunction;
 
-  get $data() {
+  get $data(): any {
     return this._data;
   }
   set $data(_) {

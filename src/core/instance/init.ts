@@ -7,6 +7,7 @@ import {isDef} from "src/shared/util";
 
 let uid = 0;
 export const vueProto_init = function(opt: ICtorOptions) {
+  debugger;
   const vm: Component = this;
   vm.$options = {
     ...opt,

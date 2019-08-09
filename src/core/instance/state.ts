@@ -183,7 +183,8 @@ function initComputed(vm: Component, computed: ComputedFnMap) {
       computedWatcherOptions
     );
 
-    if (!(key in vm)) {
+    // @TODO use `in` operator??
+    if (!vm.hasOwnProperty(key)) {
       defineComputed(vm, key, computed[key]);
     } else {
       warn(

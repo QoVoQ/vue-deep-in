@@ -4,12 +4,7 @@ import Component from "packages/vue-class-component/src";
   el: "#app",
   mounted(this: Child) {
     console.log("mounted.");
-    setInterval(() => {
-      // this.age++;
-      // this.sb += "*";
-      // this.arr[0].push(0);
-      this.nest = {a: 1};
-    }, 1000);
+    setInterval(() => {}, 1000);
   },
   watch: {
     nest: {
@@ -20,33 +15,13 @@ import Component from "packages/vue-class-component/src";
     }
   },
   render(this: Child, c) {
-    return c("dev", {}, [
-      "Hello World",
-      c("a", {class: {red: this.age % 2 === 0}}, ["I am a link"]),
-      c("p", {}, [this.age]),
-      c("p", {}, [this.hhhh])
-    ]);
+    return c("dev", {}, ["Hello World"]);
   }
 })
 class Child extends Vue {
-  age = 1;
-  computed = 0;
-  watcher = 0;
-  sb = "*";
-  arr = [[]];
-  nest = {
-    a: 1
-  };
-
-  get hhhh() {
-    if (this.arr[0].length % 2 === 0) {
-      return "null";
-    }
-    return this.age + "Name" + this.sb;
-  }
-
-  get ddd() {
-    return "ddd";
+  mewo() {}
+  get dd() {
+    return "dd";
   }
 }
 
