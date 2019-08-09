@@ -1,4 +1,4 @@
-import Vue from "src/core/instance";
+import Vue from "src/web/runtime";
 
 export default Vue;
 

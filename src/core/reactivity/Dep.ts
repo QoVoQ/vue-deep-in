@@ -1,4 +1,5 @@
 import {Watcher} from "./Watcher";
+import {arrayRemove} from "src/shared/util";
 let uid = 0;
 class Dep {
   static target: Watcher;
@@ -16,12 +17,7 @@ class Dep {
   }
 
   removeSubscriber(watcher) {
-    const idx = this.subscribers.findIndex(watcher);
-    if (idx === -1) {
-      return;
-    }
-
-    this.subscribers.splice(idx, 1);
+    arrayRemove(this.subscribers, watcher);
   }
 
   depend() {
@@ -31,7 +27,7 @@ class Dep {
     Dep.target.addDep(this);
   }
   notify() {
-    console.log(`Dep ${this.name} notify: ${this.uid}`);
+    // console.log(`Dep ${this.name} notify: ${this.uid}`);
     this.subscribers.forEach(sub => sub.update());
   }
 }

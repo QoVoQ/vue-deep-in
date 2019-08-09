@@ -1,6 +1,6 @@
 import {Component} from "../instance";
 import {IVNodeData, IComponentOptions, IDOMListener} from "./definition";
-import {isPrimitive, toString} from "src/shared/util";
+import {toString} from "src/shared/util";
 
 class VNode {
   tag?: string;
@@ -26,7 +26,7 @@ class VNode {
   constructor(
     tag?: string,
     data?: IVNodeData,
-    children?: Array<VNode | string>,
+    children?: Array<VNode>,
     text?: string,
     elm?: Element | Text | Comment,
     context?: Component
@@ -38,16 +38,7 @@ class VNode {
     this.parent = undefined;
     this.elm = elm;
     this.context = context;
-    this.children = Array.isArray(children)
-      ? children.reduce((acc, cur) => {
-          if (isPrimitive(cur)) {
-            return acc.concat(
-              new VNode(undefined, undefined, undefined, toString(cur))
-            );
-          }
-          return acc.concat(cur);
-        }, [])
-      : undefined;
+    this.children = children;
   }
 
   clone(): VNode {
@@ -74,8 +65,8 @@ function createEmptyVNode(text: string = "") {
   return node;
 }
 
-function createTextVNode(text: string | number) {
-  return new VNode(undefined, undefined, undefined, String(text));
+function createTextVNode(text: any): VNode {
+  return new VNode(undefined, undefined, undefined, toString(text));
 }
 
 type VNodeOn = {[key: string]: IDOMListener};

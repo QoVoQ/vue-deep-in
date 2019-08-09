@@ -5,7 +5,8 @@ import {
   isObject,
   isPlainObject,
   isPrimitive,
-  camelize
+  camelize,
+  arrayRemove
 } from "./util";
 
 describe("shared/util.def", () => {
@@ -57,6 +58,41 @@ describe("shared/util.camelize", () => {
 
   it("not cameliable: hello", () => {
     expect(camelize("hello")).toBe("hello");
+  });
+});
+
+describe("shared/util.arrayRemove", () => {
+  describe("selector is a function", () => {
+    it("remove a number", () => {
+      const arr = [1, 2, 3];
+      const removed = arrayRemove(arr, e => e === 1);
+      expect(arr).toEqual([2, 3]);
+      expect(removed[0]).toBe(1);
+    });
+
+    it("remove an obj", () => {
+      const obj = {name: "Tom"};
+      const arr = [obj, {age: 10}, null];
+      const removed = arrayRemove(arr, e => e === obj);
+      expect(arr).toEqual([{age: 10}, null]);
+      expect(removed[0]).toBe(obj);
+    });
+  });
+  describe("selector is not a function", () => {
+    it("remove a number", () => {
+      const arr = [1, 2, 3];
+      const removed = arrayRemove(arr, 1);
+      expect(arr).toEqual([2, 3]);
+      expect(removed[0]).toBe(1);
+    });
+
+    it("remove an obj", () => {
+      const obj = {name: "Tom"};
+      const arr = [obj, {age: 10}, null];
+      const removed = arrayRemove(arr, obj);
+      expect(arr).toEqual([{age: 10}, null]);
+      expect(removed[0]).toBe(obj);
+    });
   });
 });
 

@@ -1,9 +1,10 @@
 import {Dep, popTarget, pushTarget} from "./Dep";
 import {Component} from "../instance";
-import {remove} from "src/shared/util";
+import {remove, arrayRemove} from "src/shared/util";
 import {isObject} from "util";
 import {warn} from "src/shared/debug";
 import {queueWatcher} from "./scheduler";
+import {traverse} from "./traverse";
 
 let uid = 0;
 type WatcherCallback = (newValue: any, oldValue: any) => void;
@@ -21,45 +22,62 @@ class Watcher {
   getter: Function;
   target: Component;
   cb: WatcherCallback;
+  // relations between Dep and Watcher is many-to-many
+  // keep track of deps that contain current watcher, in order to add/remove dep
   deps: Array<Dep>;
+  depIds: Set<number>;
+  newDeps: Array<Dep>;
+  newDepIds: Set<number>;
 
   dirty?: boolean;
   user?: boolean;
   deep?: boolean;
   lazy?: boolean;
 
-  depIds: Set<number>;
   keyExpOrFn: string | Function;
   constructor(
     target,
     keyExpOrFn: string | Function,
     cb: WatcherCallback,
-    options: IWatcherOptions = {},
+    options?: IWatcherOptions,
     isRenderWatcher?: boolean
   ) {
     this.uid = uid++;
     this.target = target;
     if (isRenderWatcher) {
       target._watcher = this;
-      target._watchers.push(this);
     }
+    target._watchers.push(this);
+    if (options) {
+      this.lazy = !!options.lazy;
+      this.user = !!options.user;
+      this.deep = !!options.deep;
+    } else {
+      this.lazy = this.user = this.deep = false;
+    }
+    this.dirty = this.lazy;
     this.deps = [];
     this.depIds = new Set();
+    this.newDeps = [];
+    this.newDepIds = new Set();
     this.getter = parseGetter(keyExpOrFn);
     this.value = this.get();
     this.cb = cb.bind(target);
     this.keyExpOrFn = keyExpOrFn;
-    this.lazy = !!options.lazy;
-    this.dirty = !!options.lazy;
-    this.user = !!options.user;
-    this.deep = !!options.deep;
   }
 
-  //
+  /**
+   * have access to observed objects, which will invoke dependency collection
+   * through observed objects' `getter`
+   */
   get() {
     pushTarget(this);
-    const val = this.getter(this.target);
+    const val = this.getter.call(this.target, this.target);
+    if (this.deep) {
+      traverse(val);
+    }
     popTarget();
+    this.cleanupDeps();
     return val;
   }
 
@@ -98,13 +116,41 @@ class Watcher {
     queueWatcher(this);
   }
 
+  /**
+   * Update dependency on every call of Watcher.get
+   * @param dep
+   */
   addDep(dep: Dep) {
+    if (this.newDepIds.has(dep.uid)) {
+      return;
+    }
+    this.newDepIds.add(dep.uid);
+    this.newDeps.push(dep);
+
     if (this.depIds.has(dep.uid)) {
       return;
     }
     this.deps.push(dep);
     this.depIds.add(dep.uid);
     dep.addSubscriber(this);
+  }
+  /**
+   * Remove unrelated dependency after every call of Watcher.get
+   */
+  cleanupDeps() {
+    let i = this.deps.length;
+    while (i--) {
+      const dep = this.deps[i];
+      const depId = dep.uid;
+      if (!this.newDepIds.has(depId)) {
+        dep.removeSubscriber(this);
+        this.depIds.delete(depId);
+        arrayRemove(this.deps, dep);
+      }
+    }
+
+    this.newDepIds.clear();
+    this.newDeps = [];
   }
 
   teardown() {

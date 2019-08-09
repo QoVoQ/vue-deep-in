@@ -56,19 +56,26 @@ export function componentFactory(
 ): VueClass<Vue> {
   const ctorProto = Ctor.prototype;
 
-  Object.entries(ctorProto).forEach(([key, val]) => {
-    // methods
-    options.methods = options.methods || {};
-    if (typeof val !== "function") {
+  Object.keys(ctorProto).forEach(key => {
+    if (key === "constructor") {
       return;
     }
-    options.methods[key] = val;
-
+    // methods
+    options.methods = options.methods || {};
     // computed
     options.computed = options.computed || {};
+
     const descriptor = Object.getOwnPropertyDescriptor(ctorProto, key)!;
-    if (descriptor.get) {
-      options.computed[key] = descriptor.get;
+
+    if (descriptor.value !== undefined) {
+      if (typeof descriptor.value !== "function") {
+        return;
+      }
+      options.methods[key] = descriptor.value;
+    } else {
+      if (descriptor.get) {
+        options.computed[key] = descriptor.get;
+      }
     }
   });
 
@@ -80,7 +87,6 @@ export function componentFactory(
   const ownKeys = Object.getOwnPropertyNames(insData).filter(
     key => key.charAt(0) !== "_"
   );
-  console.log(ownKeys);
   ownKeys.forEach(key => {
     ownProps[key] = insData[key];
   });

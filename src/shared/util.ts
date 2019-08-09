@@ -95,7 +95,7 @@ function isPlainObject(obj): boolean {
 }
 
 function toString(val): string {
-  return val === null
+  return val == null
     ? ""
     : Array.isArray(val) || isPlainObject(val)
     ? JSON.stringify(val, null, 2)
@@ -112,4 +112,24 @@ function isPrimitive(val): boolean {
   );
 }
 
-export {makeMap, def, isDef, isObject, isPlainObject, isPrimitive, toString};
+function arrayRemove(arr: any[], selector: any | Function) {
+  const idx =
+    typeof selector === "function"
+      ? arr.findIndex(selector)
+      : arr.indexOf(selector);
+  if (idx === -1) {
+    return;
+  }
+  return arr.splice(idx, 1);
+}
+
+export {
+  arrayRemove,
+  makeMap,
+  def,
+  isDef,
+  isObject,
+  isPlainObject,
+  isPrimitive,
+  toString
+};

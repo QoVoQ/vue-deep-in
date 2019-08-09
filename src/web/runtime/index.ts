@@ -8,4 +8,7 @@ export const vueProto$mount = function(el?: string | Element) {
   return mountComponent(this, el);
 };
 
+Vue.prototype.__patch__ = vueProto__patch__;
+Vue.prototype.$mount = vueProto$mount;
+
 export default Vue;

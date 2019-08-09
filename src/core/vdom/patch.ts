@@ -102,7 +102,6 @@ export function createPatchFunction(backend: {
     const tag = vnode.tag;
     if (isDef(tag)) {
       vnode.elm = nodeOps.createElement(tag);
-
       createChildren(vnode, children, insertedVnodeQueue);
       // invoke create hook
       if (isDef(vnode.data)) {

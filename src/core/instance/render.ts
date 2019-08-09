@@ -1,5 +1,5 @@
 import Vue, {Component} from ".";
-import {VNode, createEmptyVNode} from "../vdom/VNode";
+import {VNode, createEmptyVNode, IVNodeData} from "../vdom/VNode";
 import {warn} from "src/shared/debug";
 import {createElement} from "../vdom/create-element";
 import {defineReactivity} from "../reactivity";
@@ -41,6 +41,12 @@ export function vueProto_render(): VNode {
   // set parent
   vnode.parent = _parentVNode;
   return vnode;
+}
+
+export interface I$createElement {
+  (tag?: string | typeof Vue, data?: IVNodeData, children?: any[]):
+    | VNode
+    | VNode[];
 }
 
 export function renderMixin(Ctor: typeof Vue) {

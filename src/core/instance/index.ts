@@ -4,7 +4,7 @@ import {IDOMListener} from "../vdom/definition";
 type createElementFunction = (
   tag: string,
   data: object,
-  children: Array<VNode | string>
+  children: Array<any>
 ) => VNode;
 type renderFunction = (c: createElementFunction) => VNode;
 
@@ -12,7 +12,11 @@ interface ICtorOptions {
   props?: any;
   methods?: {[key: string]: Function};
   computed?: {[key: string]: Function};
-  watch?: {[key: string]: Function};
+  watch?: {
+    [key: string]:
+      | Function
+      | {handler: Function; deep?: boolean; immediate?: boolean};
+  };
   name?: string;
   el?: Element | string;
   parent?: Component;
@@ -41,7 +45,12 @@ type Component = Vue;
 
 import {vueProto_init, initMixin} from "./init";
 import {vueProto$watch, stateMixin} from "./state";
-import {vueProto_render, vueProto$nextTick, renderMixin} from "./render";
+import {
+  vueProto_render,
+  vueProto$nextTick,
+  renderMixin,
+  I$createElement
+} from "./render";
 import {
   vueProto$on,
   vueProto$emit,
@@ -56,7 +65,7 @@ import {
   vueProto$forceUpdate,
   lifecycleMixin
 } from "./lifecycle";
-import {Watcher, set, del} from "../reactivity";
+import {Watcher, set, del, IWatcherOptions} from "../reactivity";
 import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
 
@@ -89,7 +98,7 @@ class Vue {
 
   $children?: Array<Component>;
 
-  $createElement?: Function;
+  $createElement?: createElementFunction;
 
   get $data() {
     return this._data;

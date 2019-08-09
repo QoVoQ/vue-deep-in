@@ -103,15 +103,15 @@ function set(target: object, key: string | number, val: any): any {
 function del(target: object, key: string | number) {
   if (Array.isArray(target)) {
     target.splice(Number(key), 1);
-  }
-
-  if (target.hasOwnProperty(key)) {
     return;
   }
-  const ob = observe(target);
+
+  if (!target.hasOwnProperty(key)) {
+    return;
+  }
+  const ob = (target as any).__ob__;
 
   delete target[key];
-
   if (ob) {
     ob.dep.notify();
   }
