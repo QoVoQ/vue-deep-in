@@ -3,6 +3,7 @@ import {invokeWithErrorHandler} from "../util/error";
 import {VNode} from "../vdom/VNode";
 import {remove, noop, isDef} from "src/shared/util";
 import {Watcher} from "../reactivity/Watcher";
+import {pushTarget, popTarget} from "../reactivity";
 
 export enum ComponentLifecycleName {
   beforeCreate = "beforeCreate",
@@ -134,6 +135,7 @@ export function mountComponent(vm: Component, el?: Element): Component {
   return vm;
 }
 export function callHook(vm: Component, hookName: ComponentLifecycleName) {
+  pushTarget();
   let fns = vm.$options[hookName];
   if (!isDef(fns)) {
     return;
@@ -144,4 +146,5 @@ export function callHook(vm: Component, hookName: ComponentLifecycleName) {
   fns.forEach(fn => {
     invokeWithErrorHandler(fn, vm, undefined, `lifecycle hook: ${hookName}`);
   });
+  popTarget();
 }
