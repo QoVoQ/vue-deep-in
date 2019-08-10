@@ -34,4 +34,14 @@ describe("Instance properties", () => {
     expect(typeof vm.$options.methods.a).toBe("function");
     expect(typeof vm.$options.methods.b).toBe("function");
   });
+
+  it("$root/$children", () => {});
+  it("$parent", () => {});
+  it("$props", () => {});
+  it("warn mutating $props", () => {});
+  it("$attr", () => {});
+  it("$attrs should not be undefined when no props passed in", () => {});
+  it("warn mutating $attrs", () => {});
+  it("$listener", () => {});
+  it("warn mutating $listeners", () => {});
 });

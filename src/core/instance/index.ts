@@ -8,7 +8,7 @@ type createElementFunction = (
 ) => VNode;
 type renderFunction = (c: createElementFunction) => VNode;
 
-interface ICtorOptions {
+interface ICtorUserOpt {
   props?: any;
   methods?: {[key: string]: Function};
   computed?: {[key: string]: Function};
@@ -19,11 +19,11 @@ interface ICtorOptions {
   };
   name?: string;
   el?: Element | string;
-  parent?: Component;
-
   components?: object;
   propsData?: object;
-  data?: () => object;
+  data?: object | (() => object);
+
+  render: renderFunction;
 
   [ComponentLifecycleName.beforeCreate]?: Function | Function[];
   [ComponentLifecycleName.created]?: Function | Function[];
@@ -31,7 +31,10 @@ interface ICtorOptions {
   [ComponentLifecycleName.mounted]?: Function | Function[];
   [ComponentLifecycleName.beforeDestroy]?: Function | Function[];
   [ComponentLifecycleName.destroyed]?: Function | Function[];
-  render: renderFunction;
+}
+
+interface ICtorOptions extends ICtorUserOpt {
+  parent?: Component;
   _propKeys?: string[];
   _componentTagName?: string;
   _parentListeners?: {[key: string]: IDOMListener};
@@ -168,4 +171,4 @@ renderMixin(Vue);
 stateMixin(Vue);
 export default Vue;
 
-export {Vue, Component, ICtorOptions};
+export {Vue, Component, ICtorUserOpt, ICtorOptions};

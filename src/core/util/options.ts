@@ -1,29 +1,6 @@
-import {Component} from "src";
+import {Component, ICtorUserOpt} from "src";
 import {ComponentLifecycleName} from "../instance/lifecycle";
 import {isDef, isPlainObject} from "src/shared/util";
-
-interface ICtorOpt {
-  props?: any;
-  methods?: {[key: string]: Function};
-  computed?: {[key: string]: Function};
-  watch?: {
-    [key: string]:
-      | Function
-      | {handler: Function; deep?: boolean; immediate?: boolean};
-  };
-  name?: string;
-  el?: Element | string;
-  components?: object;
-  propsData?: object;
-  data?: () => object;
-
-  [ComponentLifecycleName.beforeCreate]?: Function | Function[];
-  [ComponentLifecycleName.created]?: Function | Function[];
-  [ComponentLifecycleName.beforeMount]?: Function | Function[];
-  [ComponentLifecycleName.mounted]?: Function | Function[];
-  [ComponentLifecycleName.beforeDestroy]?: Function | Function[];
-  [ComponentLifecycleName.destroyed]?: Function | Function[];
-}
 
 const mergeStrategy: {[key: string]: Function} = Object.create(null);
 
@@ -160,8 +137,8 @@ mergeStrategy.props = mergeStrategy.methods = mergeStrategy.computed = function(
 };
 
 export function mergeOptions(
-  optParent: ICtorOpt,
-  optChild: ICtorOpt,
+  optParent: Partial<ICtorUserOpt>,
+  optChild: Partial<ICtorUserOpt>,
   vm?: Component
 ) {
   const options = {};

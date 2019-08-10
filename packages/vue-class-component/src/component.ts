@@ -1,4 +1,4 @@
-import Vue, {ICtorOptions} from "src";
+import Vue, {ICtorUserOpt} from "src";
 import {VueClass} from "./definitions";
 import {mergeOptions} from "src/core/util/options";
 
@@ -53,7 +53,7 @@ import {mergeOptions} from "src/core/util/options";
 // }
 export function componentFactory(
   Ctor: VueClass<Vue>,
-  options: Partial<ICtorOptions> = {}
+  options: Partial<ICtorUserOpt> = {}
 ): VueClass<Vue> {
   const ctorProto = Ctor.prototype;
   Object.getOwnPropertyNames(ctorProto).forEach(key => {
@@ -98,7 +98,7 @@ export function componentFactory(
   Ctor.prototype._init = originalInit;
 
   return class extends Ctor {
-    constructor(opt: Partial<ICtorOptions> = {}) {
+    constructor(opt: Partial<ICtorUserOpt> = {}) {
       super(mergeOptions(options, opt));
     }
   };

@@ -96,7 +96,6 @@ function initData(vm: Component) {
   data = vm._data = typeof data === "function" ? getData(data, vm) : data || {};
 
   // proxy data on instance
-
   Object.keys(data).forEach(key => {
     proxy(vm, `_data`, key);
   });

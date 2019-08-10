@@ -1,13 +1,13 @@
 import {VueClass} from "./definitions";
-import Vue, {ICtorOptions} from "src";
+import Vue, {ICtorUserOpt} from "src";
 import {componentFactory} from "./component";
 
 function Component<T extends VueClass<Vue>>(Ctor: T): T;
 function Component(
-  option: Partial<ICtorOptions>
+  option: Partial<ICtorUserOpt>
 ): <T extends VueClass<Vue>>(Ctor: T) => T;
 function Component<T extends VueClass<Vue>>(
-  optionOrCtor: Partial<ICtorOptions> | T
+  optionOrCtor: Partial<ICtorUserOpt> | T
 ) {
   if (typeof optionOrCtor === "function") {
     return componentFactory(optionOrCtor, {});
