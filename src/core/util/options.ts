@@ -141,7 +141,7 @@ export function mergeOptions(
   optChild: Partial<ICtorUserOpt>,
   vm?: Component
 ) {
-  const options = {};
+  const options: Partial<ICtorUserOpt> = {};
   function mergeField(key) {
     const strategy = mergeStrategy[key] || defaultStrategy;
     options[key] = strategy(optParent[key], optChild[key], vm);

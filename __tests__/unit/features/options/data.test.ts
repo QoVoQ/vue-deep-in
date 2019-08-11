@@ -40,19 +40,26 @@ describe("Options data", () => {
 
     it("merge the same key recursively", () => {
       type ab = {a?: any; b?: any};
-      @Component
-      class ParentComp extends Vue {
-        obj: ab = {a: 1};
-      }
-      @Component
-      class ChildComp extends ParentComp {
-        obj: ab = {b: 2};
-      }
 
-      const child = new ChildComp();
-      console.log(child);
-      expect(child.obj.a).toBe(1);
-      expect(child.obj.b).toBe(2);
+      const WithObject = Vue.extend({
+        data() {
+          return {
+            obj: {a: 1}
+          };
+        }
+      });
+      const vm = new WithObject({
+        data: {
+          obj: {
+            b: 2
+          }
+        },
+        render() {
+          return null;
+        }
+      });
+      expect((vm as any).obj.a).toBe(1);
+      expect((vm as any).obj.b).toBe(2);
     });
   });
 });

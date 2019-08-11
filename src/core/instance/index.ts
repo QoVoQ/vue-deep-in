@@ -71,8 +71,15 @@ import {
 import {Watcher, set, del, IWatcherOptions} from "../reactivity";
 import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
+import {ctorExtend} from "../global-api/extend";
 
 class Vue {
+  static extend = ctorExtend;
+  static cid = 0;
+  static _base: typeof Vue;
+  static options: Partial<ICtorUserOpt> & {_base?: typeof Vue};
+
+  static super?: typeof Vue;
   _uid: number;
 
   _self: Vue;
@@ -120,7 +127,7 @@ class Vue {
     warn("$props is readonly");
   }
   $el?: Element;
-  $options?: ICtorOptions;
+  $options?: Partial<ICtorOptions>;
 
   $parent?: Component;
 
@@ -130,13 +137,7 @@ class Vue {
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 
-  constructor(
-    opts: ICtorOptions = {
-      render() {
-        return null;
-      }
-    }
-  ) {
+  constructor(opts?: ICtorUserOpt) {
     this._init(opts);
   }
 
