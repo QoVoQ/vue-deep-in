@@ -23,7 +23,9 @@ interface ICtorUserOpt {
   propsData?: object;
   data?: object | (() => object);
 
-  render: renderFunction;
+  render?: renderFunction;
+
+  mixins?: ICtorOptions[];
 
   [ComponentLifecycleName.beforeCreate]?: Function | Function[];
   [ComponentLifecycleName.created]?: Function | Function[];
@@ -31,6 +33,9 @@ interface ICtorUserOpt {
   [ComponentLifecycleName.mounted]?: Function | Function[];
   [ComponentLifecycleName.beforeDestroy]?: Function | Function[];
   [ComponentLifecycleName.destroyed]?: Function | Function[];
+
+  // user defined options
+  [key: string]: any;
 }
 
 interface ICtorOptions extends ICtorUserOpt {
@@ -92,13 +97,13 @@ class Vue {
 
   _data?: object;
 
-  _isBeingDestroyed: boolean = false;
+  _isBeingDestroyed: boolean;
 
-  _isDestroyed: boolean = false;
+  _isDestroyed: boolean;
 
-  _isMounted: boolean = false;
+  _isMounted: boolean;
 
-  _isVue: boolean = true;
+  _isVue: boolean;
 
   _watcher?: Watcher;
 

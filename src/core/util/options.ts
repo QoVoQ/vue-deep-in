@@ -1,4 +1,4 @@
-import {Component, ICtorUserOpt} from "src";
+import Vue, {Component, ICtorUserOpt} from "src";
 import {ComponentLifecycleName} from "../instance/lifecycle";
 import {isDef, isPlainObject} from "src/shared/util";
 
@@ -17,7 +17,7 @@ function mergeData(to: object, from?: object): object {
 
   const keys = Object.keys(from);
 
-  for (let i = 0, key = keys[i]; i < keys.length; i++) {
+  for (let i = 0, key = keys[0]; i < keys.length; key = keys[++i]) {
     if (key === "__ob__") {
       continue;
     }
@@ -138,9 +138,19 @@ mergeStrategy.props = mergeStrategy.methods = mergeStrategy.computed = function(
 
 export function mergeOptions(
   optParent: Partial<ICtorUserOpt>,
-  optChild: Partial<ICtorUserOpt>,
+  optChild: Partial<ICtorUserOpt> & {_base?: typeof Vue},
   vm?: Component
 ) {
+  // Apply extends and mixins on the child options,
+  // but only if it is a raw options object that isn't
+  // the result of another mergeOptions call.
+  if (!optChild._base) {
+    if (optChild.mixins) {
+      optChild.mixins.forEach(mix => {
+        optParent = mergeOptions(optParent, mix, vm);
+      });
+    }
+  }
   const options: Partial<ICtorUserOpt> = {};
   function mergeField(key) {
     const strategy = mergeStrategy[key] || defaultStrategy;

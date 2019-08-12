@@ -1,6 +1,8 @@
 import Vue, {ICtorUserOpt, ICtorOptions} from "src";
 import {VueClass} from "./definitions";
 import {mergeOptions} from "src/core/util/options";
+import {collectDataFromCtor} from "./data";
+import {ComponentLifecycleName} from "src/core/instance/lifecycle";
 
 /**
  * because vue options like props, methods, computed, data can be access through
@@ -51,19 +53,29 @@ import {mergeOptions} from "src/core/util/options";
 //    * }
 //    */
 // }
+
+export const $innerHooks = ["data", ...Object.keys(ComponentLifecycleName)];
 export function componentFactory(
   Ctor: VueClass,
   options: Partial<ICtorUserOpt> = {}
 ): VueClass {
+  options.name =
+    options.name || (Ctor as any)._componentTag || (Ctor as any).name;
   const ctorProto = Ctor.prototype;
+  options.methods = options.methods || {};
+  // computed
+  options.computed = options.computed || {};
+  options.mixins = options.mixins || [];
+
   Object.getOwnPropertyNames(ctorProto).forEach(key => {
     if (key === "constructor") {
       return;
     }
-    // methods
-    options.methods = options.methods || {};
-    // computed
-    options.computed = options.computed || {};
+
+    if ($innerHooks.indexOf(key) > -1) {
+      options[key] = ctorProto[key];
+      return;
+    }
 
     const descriptor = Object.getOwnPropertyDescriptor(ctorProto, key)!;
 
@@ -71,34 +83,53 @@ export function componentFactory(
       if (typeof descriptor.value !== "function") {
         return;
       }
+      //extract option methods
       options.methods[key] = descriptor.value;
     } else {
+      // extract option computed
       if (descriptor.get) {
         options.computed[key] = descriptor.get;
       }
     }
   });
-
-  // data
-  const originalInit = Ctor.prototype._init;
-  Ctor.prototype._init = function() {};
-  const insData = new Ctor();
-  const ownProps = {};
-  const ownKeys = Object.getOwnPropertyNames(insData).filter(
-    key => key.charAt(0) !== "_"
-  );
-  ownKeys.forEach(key => {
-    ownProps[key] = insData[key];
+  // extract option data
+  options.mixins.push({
+    data(this: Vue) {
+      return collectDataFromCtor(this, Ctor);
+    }
   });
-
-  options.data = function() {
-    return JSON.parse(JSON.stringify(ownProps));
-  };
-
-  Ctor.prototype._init = originalInit;
 
   const superProto = Object.getPrototypeOf(Ctor.prototype);
   const Super = superProto instanceof Vue ? Ctor : Vue;
 
-  return Super.extend(options);
+  const Extended = Super.extend(options);
+
+  forwardStaticMembers(Extended, Ctor);
+
+  return Extended;
+}
+
+const ignoredKeys = ["prototype", "arguments", "callee", "caller"];
+
+function forwardStaticMembers(Extended: typeof Vue, Original: typeof Vue) {
+  Object.getOwnPropertyNames(Original).forEach(key => {
+    if (ignoredKeys.indexOf(key) > -1) {
+      return;
+    }
+
+    const extendedKeyDescriptor = Object.getOwnPropertyDescriptor(
+      Extended,
+      key
+    );
+
+    if (extendedKeyDescriptor && !extendedKeyDescriptor.configurable) {
+      return;
+    }
+    const originalKeyDescriptor = Object.getOwnPropertyDescriptor(
+      Original,
+      key
+    );
+
+    Object.defineProperty(Extended, key, originalKeyDescriptor);
+  });
 }
