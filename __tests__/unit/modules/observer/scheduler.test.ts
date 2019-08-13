@@ -18,7 +18,8 @@ describe("Scheduler", () => {
 
   it("queueWatcher", done => {
     queueWatcher({
-      run: spy
+      run: spy,
+      target: {}
     });
     Promise.resolve()
       .then(() => {
@@ -30,11 +31,13 @@ describe("Scheduler", () => {
   it("dedup", done => {
     queueWatcher({
       uid: 1,
-      run: spy
+      run: spy,
+      target: {}
     });
     queueWatcher({
       uid: 1,
-      run: spy
+      run: spy,
+      target: {}
     });
     waitForUpdate(() => {
       expect(spy).toHaveBeenCalledTimes(1);
@@ -44,11 +47,13 @@ describe("Scheduler", () => {
   it("allow duplicate when flushing", done => {
     const job = {
       uid: 1,
-      run: spy
+      run: spy,
+      target: {}
     };
     queueWatcher(job);
     queueWatcher({
       uid: 2,
+      target: {},
       run() {
         queueWatcher(job);
       }
@@ -58,27 +63,29 @@ describe("Scheduler", () => {
     }).then(done);
   });
 
-  // it("call user watchers before component re-render", done => {
-  //   const calls = [];
-  //   const vm = new Vue({
-  //     data: {
-  //       a: 1
-  //     },
-  //     template: "<div>{{ a }}</div>",
-  //     watch: {
-  //       a() {
-  //         calls.push(1);
-  //       }
-  //     },
-  //     beforeUpdate() {
-  //       calls.push(2);
-  //     }
-  //   }).$mount();
-  //   vm.a = 2;
-  //   waitForUpdate(() => {
-  //     expect(calls).toEqual([1, 2]);
-  //   }).then(done);
-  // });
+  it("call user watchers before component re-render", done => {
+    const calls = [];
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      render(h) {
+        return h("div", {}, [this.a]);
+      },
+      watch: {
+        a() {
+          calls.push(1);
+        }
+      },
+      beforeUpdate() {
+        calls.push(2);
+      }
+    }).$mount();
+    (vm as any).a = 2;
+    waitForUpdate(() => {
+      expect(calls).toEqual([1, 2]);
+    }).then(done);
+  });
 
   // it("call user watcher triggered by component re-render immediately", done => {
   //   // this happens when a component re-render updates the props of a child
@@ -122,10 +129,12 @@ describe("Scheduler", () => {
     queueWatcher({
       uid: 1,
       user: true,
+      target: {},
       run() {
         callOrder.push(1);
         queueWatcher({
           uid: 2,
+          target: {},
           run() {
             callOrder.push(3);
           }

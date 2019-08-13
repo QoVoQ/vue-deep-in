@@ -10,6 +10,8 @@ export enum ComponentLifecycleName {
   created = "created",
   beforeMount = "beforeMount",
   mounted = "mounted",
+  beforeUpdate = "beforeUpdate",
+  updated = "updated",
   beforeDestroy = "beforeDestroy",
   destroyed = "destroyed"
 }

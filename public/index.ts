@@ -1,21 +1,20 @@
 import Vue from "src";
 import Component from "packages/vue-class-component/src";
 
-@Component
-class MyComp extends Vue {
-  $store: any;
-  foo: string = "Hello, " + this.$store.state.msg;
-  name: string;
-  age: number;
-
-  beforeCreate() {
-    this.$store = {
-      state: {
-        msg: "world"
-      }
-    };
+const vm = new Vue({
+  el: "#app",
+  render(h) {
+    return h("div", {}, [this.msg]);
+  },
+  data: {msg: "foo"},
+  beforeUpdate() {
+    this.msg += "!";
   }
-}
-const c = new MyComp();
+});
 
-console.log(c);
+console.log(111);
+(vm as any).msg = "bar";
+console.log(222);
+setInterval(() => {
+  console.log(1222);
+}, 1000);

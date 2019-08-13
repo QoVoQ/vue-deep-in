@@ -1,5 +1,7 @@
 import {Watcher} from "./Watcher";
 import {nextTick} from "../util/next-tick";
+import {callHook, ComponentLifecycleName} from "../instance/lifecycle";
+import Vue from "src";
 
 const watcherQueue: Array<Watcher> = [];
 let isWatcherQueueRegistered = false;
@@ -24,19 +26,39 @@ function flushWatcherQueue() {
     runningWatcherIdx++
   ) {
     const curWatcher = watcherQueue[runningWatcherIdx];
+    callBeforeUpdateHook(curWatcher);
     has[curWatcher.uid] = false;
     curWatcher.run();
   }
-
+  const updatedQueue = watcherQueue.slice();
   resetQueue();
-
   // call component's update hook
+  // @TODO may be same component's update hook be called multiple times?
+  callUpdatedHook(updatedQueue);
 }
 
 function resetQueue() {
   has = Object.create(null);
   isWatcherQueueRegistered = isWatcherFlushing = false;
   watcherQueue.length = 0;
+}
+
+function shouldCallHook(watcher: Watcher) {
+  const vm = watcher.target;
+  // only call `updated` for component's render watcher
+  return vm._watcher === watcher && vm._isMounted && !vm._isDestroyed;
+}
+function callUpdatedHook(watchers: Watcher[]) {
+  watchers.forEach(watcher => {
+    if (shouldCallHook(watcher)) {
+      callHook(watcher.target, ComponentLifecycleName.updated);
+    }
+  });
+}
+function callBeforeUpdateHook(watcher: Watcher) {
+  if (shouldCallHook(watcher)) {
+    callHook(watcher.target, ComponentLifecycleName.beforeUpdate);
+  }
 }
 
 /**

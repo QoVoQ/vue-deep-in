@@ -128,6 +128,174 @@ describe("Options lifecycle hooks", () => {
     //   }).$mount();
     //   expect(calls).toEqual(["nested", "child", "parent"]);
   });
+
+  describe("beforeUpdate", () => {
+    it("should be called before update", done => {
+      const vm = new Vue({
+        render(h) {
+          return h("div", {}, [this.msg]);
+        },
+        data: {msg: "foo"},
+        beforeUpdate() {
+          spy();
+          expect(this.$el.textContent).toBe("foo");
+        }
+      }).$mount();
+      expect(spy).not.toHaveBeenCalled();
+      (vm as any).msg = "bar";
+      expect(spy).not.toHaveBeenCalled(); // should be async
+      Promise.resolve()
+        .then(() => {
+          expect(spy).toHaveBeenCalled();
+        })
+        .then(done);
+    });
+
+    it("should be called before render and allow mutating state", done => {
+      const vm = new Vue({
+        render(h) {
+          return h("div", {}, [this.msg]);
+        },
+        data: {msg: "foo"},
+        beforeUpdate() {
+          this.msg += "!";
+        }
+      }).$mount();
+      expect(vm.$el.textContent).toBe("foo");
+      (vm as any).msg = "bar";
+      Promise.resolve()
+        .then(() => {
+          expect(vm.$el.textContent).toBe("bar!");
+        })
+        .then(done);
+    });
+
+    // #8076
+    // it("should not be called after destroy", done => {
+    //   const beforeUpdate = jasmine.createSpy("beforeUpdate");
+    //   const destroyed = jasmine.createSpy("destroyed");
+
+    //   Vue.component("todo", {
+    //     template: "<div>{{todo.done}}</div>",
+    //     props: ["todo"],
+    //     destroyed,
+    //     beforeUpdate
+    //   });
+
+    //   const vm = new Vue({
+    //     template: `
+    //       <div>
+    //         <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
+    //       </div>
+    //     `,
+    //     data() {
+    //       return {
+    //         todos: [{id: 1, done: false}]
+    //       };
+    //     },
+    //     computed: {
+    //       pendingTodos() {
+    //         return this.todos.filter(t => !t.done);
+    //       }
+    //     }
+    //   }).$mount();
+
+    //   vm.todos[0].done = true;
+    //   waitForUpdate(() => {
+    //     expect(destroyed).toHaveBeenCalled();
+    //     expect(beforeUpdate).not.toHaveBeenCalled();
+    //   }).then(done);
+    // });
+  });
+
+  describe("updated", () => {
+    it("should be called after update", done => {
+      const vm = new Vue({
+        render(h) {
+          return h("div", {}, [this.msg]);
+        },
+        data: {msg: "foo"},
+        updated() {
+          spy();
+          expect(this.$el.textContent).toBe("bar");
+        }
+      }).$mount();
+      expect(spy).not.toHaveBeenCalled();
+      (vm as any).msg = "bar";
+      expect(spy).not.toHaveBeenCalled(); // should be async
+      Promise.resolve()
+        .then(() => {
+          expect(spy).toHaveBeenCalled();
+        })
+        .then(done);
+    });
+
+    // it("should be called after children are updated", done => {
+    //   const calls = [];
+    //   const vm = new Vue({
+    //     template: '<div><test ref="child">{{ msg }}</test></div>',
+    //     data: { msg: "foo" },
+    //     components: {
+    //       test: {
+    //         template: `<div><slot></slot></div>`,
+    //         updated() {
+    //           expect(this.$el.textContent).toBe("bar");
+    //           calls.push("child");
+    //         }
+    //       }
+    //     },
+    //     updated() {
+    //       expect(this.$el.textContent).toBe("bar");
+    //       calls.push("parent");
+    //     }
+    //   }).$mount();
+
+    //   expect(calls).toEqual([]);
+    //   vm.msg = "bar";
+    //   expect(calls).toEqual([]);
+    //   waitForUpdate(() => {
+    //     expect(calls).toEqual(["child", "parent"]);
+    //   }).then(done);
+    // });
+
+    // #8076
+    // it("should not be called after destroy", done => {
+    //   const updated = jasmine.createSpy("updated");
+    //   const destroyed = jasmine.createSpy("destroyed");
+
+    //   Vue.component("todo", {
+    //     template: "<div>{{todo.done}}</div>",
+    //     props: ["todo"],
+    //     destroyed,
+    //     updated
+    //   });
+
+    //   const vm = new Vue({
+    //     template: `
+    //       <div>
+    //         <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
+    //       </div>
+    //     `,
+    //     data() {
+    //       return {
+    //         todos: [{ id: 1, done: false }]
+    //       };
+    //     },
+    //     computed: {
+    //       pendingTodos() {
+    //         return this.todos.filter(t => !t.done);
+    //       }
+    //     }
+    //   }).$mount();
+
+    //   vm.todos[0].done = true;
+    //   waitForUpdate(() => {
+    //     expect(destroyed).toHaveBeenCalled();
+    //     expect(updated).not.toHaveBeenCalled();
+    //   }).then(done);
+    // });
+  });
+
   describe("beforeDestroy", () => {
     it("should be called before destroy", () => {
       const vm = new Vue({

@@ -126,7 +126,9 @@ function arrayRemove(arr: any[], selector: any | Function) {
   }
   return arr.splice(idx, 1);
 }
-
+function waitForUpdate(cb: (val: any) => void): Promise<any> {
+  return Promise.resolve().then(cb);
+}
 export {
   arrayRemove,
   makeMap,
@@ -136,5 +138,6 @@ export {
   isPlainObject,
   isPrimitive,
   toString,
-  hasOwn
+  hasOwn,
+  waitForUpdate
 };
