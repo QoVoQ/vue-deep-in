@@ -1,6 +1,6 @@
 import {Dep, popTarget, pushTarget} from "./Dep";
 import {Component} from "../instance";
-import {remove, arrayRemove} from "src/shared/util";
+import {remove, arrayRemove, isDef} from "src/shared/util";
 import {isObject} from "util";
 import {warn} from "src/shared/debug";
 import {queueWatcher} from "./scheduler";
@@ -181,7 +181,7 @@ function parseGetter(keyPathOrFn) {
   return obj => {
     const paths = keyPathOrFn.split(".");
     for (let i = 0; i < paths.length; i++) {
-      if (!obj || !obj[paths[i]]) {
+      if (!obj || !isDef(obj[paths[i]])) {
         return;
       }
 

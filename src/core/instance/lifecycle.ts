@@ -95,6 +95,9 @@ export function initLifecycle(vm: Component) {
   const options = vm.$options;
 
   const parent = options.parent;
+  if (parent) {
+    parent.$children.push(vm);
+  }
   vm.$parent = parent;
   vm.$root = parent ? parent.$root : vm;
 

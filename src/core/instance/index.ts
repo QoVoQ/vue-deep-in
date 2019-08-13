@@ -15,6 +15,7 @@ interface ICtorUserOpt {
   watch?: {
     [key: string]:
       | Function
+      | string
       | {handler: Function; deep?: boolean; immediate?: boolean};
   };
   name?: string;
