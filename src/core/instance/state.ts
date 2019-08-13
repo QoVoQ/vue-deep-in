@@ -157,7 +157,7 @@ function createWatcher(
   }
   return vm.$watch(expOrFn, handler, options);
 }
-
+// lazy computed value
 const computedWatcherOptions = {lazy: true};
 
 // const vm = new Vue({

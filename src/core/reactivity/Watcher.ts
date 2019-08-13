@@ -61,9 +61,9 @@ class Watcher {
     this.newDeps = [];
     this.newDepIds = new Set();
     this.getter = parseGetter(keyExpOrFn);
-    this.value = this.get();
     this.cb = cb.bind(target);
     this.keyExpOrFn = keyExpOrFn;
+    this.value = this.lazy ? undefined : this.get();
   }
 
   /**

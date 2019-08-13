@@ -25,7 +25,6 @@ export const vueProto_init = function(opt?: ICtorUserOpt) {
   callHook(vm, ComponentLifecycleName.beforeCreate);
   initState(vm);
   callHook(vm, ComponentLifecycleName.created);
-
   if (vm.$options.el) {
     vm.$mount(vm.$options.el);
   }
