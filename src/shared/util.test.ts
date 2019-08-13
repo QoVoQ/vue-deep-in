@@ -6,7 +6,8 @@ import {
   isPlainObject,
   isPrimitive,
   camelize,
-  arrayRemove
+  arrayRemove,
+  hasOwn
 } from "./util";
 
 describe("shared/util.def", () => {
@@ -93,6 +94,36 @@ describe("shared/util.arrayRemove", () => {
       expect(arr).toEqual([{age: 10}, null]);
       expect(removed[0]).toBe(obj);
     });
+  });
+});
+
+describe("shared/util.hasOwn", () => {
+  it("obj.a should has a", () => {
+    const obj = {a: 1};
+    expect(hasOwn(obj, "a")).toBe(true);
+  });
+
+  it("obj.a should not has b", () => {
+    const obj = {a: 1};
+    expect(hasOwn(obj, "b")).toBe(false);
+  });
+
+  it("arr should has 0", () => {
+    const arr = [1];
+    expect(hasOwn(arr, 0)).toBe(true);
+  });
+
+  it("should return false on properties of __proto__", () => {
+    const a = Object.create({b: 1});
+    a.c = 1;
+    expect(hasOwn(a, "b")).toBe(false);
+    expect(hasOwn(a, "c")).toBe(true);
+  });
+
+  it("should work for obj without __proto__", () => {
+    const a = Object.create(null);
+    a.b = 1;
+    expect(hasOwn(a, "b")).toBe(true);
   });
 });
 

@@ -1,6 +1,6 @@
 import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
-import {def} from "src/shared/util";
+import {def, hasOwn} from "src/shared/util";
 
 class Observer {
   dep: Dep;
@@ -17,22 +17,36 @@ class Observer {
   }
 
   walk(obj) {
-    Object.entries(obj).forEach(([key, value]) => {
-      if (typeof value === "object") {
-        new Observer(value);
-      }
-      defineReactivity(obj, key, value);
+    Object.keys(obj).forEach(key => {
+      defineReactivity(obj, key);
     });
   }
 }
 
-function defineReactivity(target, key, value) {
-  const dep = new Dep(key);
+function defineReactivity(target: object, key: string | number, value?: any) {
+  // handle condition 'key' have been defined by `Object.defineProperty`
+  const descriptor = Object.getOwnPropertyDescriptor(target, key);
+  if (descriptor && !descriptor.configurable) {
+    return;
+  }
+
+  const oldGet = descriptor && descriptor.get;
+  const oldSet = descriptor && descriptor.set;
+  /**
+   *
+   */
+  if (arguments.length === 2) {
+    value = target[key];
+  }
+  // manage dependency in key's setter and getter
+  const dep = new Dep(String(key));
+  // manage dependency for set/del
   let childOb = observe(value);
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
     get() {
+      value = oldGet ? oldGet.call(target) : value;
       dep.depend();
       childOb && childOb.dep.depend();
       if (Array.isArray(value)) {
@@ -42,8 +56,15 @@ function defineReactivity(target, key, value) {
     },
 
     set(newValue) {
-      if (newValue === value) {
+      const oldValue = oldGet ? oldGet.call(target) : value;
+      if (Object.is(newValue, oldValue)) {
         return;
+      }
+      if (oldGet && !oldSet) {
+        return;
+      }
+      if (oldSet) {
+        oldSet.call(target, newValue);
       }
       value = newValue;
       childOb = observe(value);
@@ -53,7 +74,8 @@ function defineReactivity(target, key, value) {
 }
 
 function observe(val): Observer {
-  if (typeof val !== "object") {
+  // ignore when input is not an obj || is a vue instance || is a frozen obj
+  if (typeof val !== "object" || val._isVue || !Object.isExtensible(val)) {
     return;
   }
 
@@ -81,12 +103,12 @@ function dependArray(arr: Array<any>) {
 }
 
 function set(target: object, key: string | number, val: any): any {
-  if (Array.isArray(target)) {
+  if (Array.isArray(target) && typeof key === "number") {
     target.splice(Number(key), 1, val);
     return val;
   }
 
-  if (target.hasOwnProperty(key)) {
+  if (hasOwn(target, key)) {
     target[key] = val;
     return val;
   }
@@ -101,12 +123,12 @@ function set(target: object, key: string | number, val: any): any {
 }
 
 function del(target: object, key: string | number) {
-  if (Array.isArray(target)) {
+  if (Array.isArray(target) && typeof key === "number") {
     target.splice(Number(key), 1);
     return;
   }
 
-  if (!target.hasOwnProperty(key)) {
+  if (!hasOwn(target, key)) {
     return;
   }
   const ob = (target as any).__ob__;

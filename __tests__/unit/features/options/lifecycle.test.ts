@@ -47,8 +47,8 @@ describe("Options lifecycle hooks", () => {
   describe("beforeMount", () => {
     it("should not have mounted", () => {
       @Component({
-        render() {
-          return null;
+        render(h) {
+          return h("div", {}, []);
         },
         beforeMount() {
           spy();
@@ -131,8 +131,8 @@ describe("Options lifecycle hooks", () => {
   describe("beforeDestroy", () => {
     it("should be called before destroy", () => {
       const vm = new Vue({
-        render() {
-          return null;
+        render(h) {
+          return h("div", {}, []);
         },
         beforeDestroy() {
           spy();
@@ -151,8 +151,8 @@ describe("Options lifecycle hooks", () => {
   describe("destroyed", () => {
     it("should be called after destroy", () => {
       const vm = new Vue({
-        render() {
-          return null;
+        render(h) {
+          return h("div", {}, []);
         },
         destroyed() {
           spy();
@@ -173,8 +173,8 @@ describe("Options lifecycle hooks", () => {
     const mounted = jest.fn();
     const destroyed = jest.fn();
     const vm = new Vue({
-      render() {
-        return null;
+      render(h) {
+        return h("div", {}, []);
       },
       created() {
         created();

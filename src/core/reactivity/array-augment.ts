@@ -1,6 +1,14 @@
 import {observeArray} from "./Observer";
 import {def} from "src/shared/util";
-const arrayMethod = ["push", "pop", "unshift", "shift", "splice"];
+const arrayMethod = [
+  "push",
+  "pop",
+  "unshift",
+  "shift",
+  "splice",
+  "reverse",
+  "sort"
+];
 const augmentedArrayPrototype = Object.create(Array.prototype);
 
 arrayMethod.forEach(methodName => {

@@ -82,6 +82,10 @@ export function toObject(arr: Array<any>): Object {
   return res;
 }
 
+function hasOwn(target: object, key: string | number) {
+  return Object.hasOwnProperty.call(target, key);
+}
+
 function isDef(val): boolean {
   return val !== null && val !== undefined;
 }
@@ -131,5 +135,6 @@ export {
   isObject,
   isPlainObject,
   isPrimitive,
-  toString
+  toString,
+  hasOwn
 };

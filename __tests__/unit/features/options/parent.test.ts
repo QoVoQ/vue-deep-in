@@ -3,15 +3,15 @@ import Vue from "src";
 describe("Options parent", () => {
   it("should work", () => {
     const parent = new Vue({
-      render() {
-        return null;
+      render(h) {
+        return h("div", {}, []);
       }
     }).$mount();
 
     const child = new Vue({
       parent: parent,
-      render() {
-        return null;
+      render(h) {
+        return h("div", {}, []);
       }
     }).$mount();
 
