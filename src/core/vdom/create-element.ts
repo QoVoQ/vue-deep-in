@@ -8,7 +8,7 @@ export function createElement(
   context: Component,
   tag?: string | typeof Vue,
   data?: IVNodeData,
-  children?: Array<any>
+  children?: Array<any> | any
 ): VNode {
   if (!tag) {
     // in case of component :is set to falsy value
@@ -53,5 +53,7 @@ function normalizeChildren(children: any[]): VNode[] {
         const vnode = cur instanceof VNode ? cur : createTextVNode(cur);
         return acc.concat(vnode);
       }, [])
+    : isDef(children)
+    ? [createTextVNode(children)]
     : [];
 }
