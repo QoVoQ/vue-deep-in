@@ -8,11 +8,7 @@ function updateClass(oldVnode: any, vnode: any) {
   const el = vnode.elm;
   const data: IVNodeData = vnode.data;
   const oldData: IVNodeData = oldVnode.data;
-  if (
-    !isDef(data.staticClass) &&
-    !isDef(data.class) &&
-    (!isDef(oldData) || (!isDef(oldData.staticClass) && !isDef(oldData.class)))
-  ) {
+  if (!isDef(data.class) && (!isDef(oldData) || !isDef(oldData.class))) {
     return;
   }
 

@@ -5,7 +5,7 @@ import {Watcher} from "src/core/reactivity/Watcher";
 const vm = new Vue({
   el: "#app",
   render(h) {
-    return h("div", {}, [this.msg]);
+    return h("div", {}, [this.b]);
   },
   data: {b: {c: 1}}
 });

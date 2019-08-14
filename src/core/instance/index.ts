@@ -3,8 +3,8 @@ import {IDOMListener} from "../vdom/definition";
 
 type createElementFunction = (
   tag: string,
-  data: object,
-  children: Array<any>
+  data?: object,
+  children?: Array<any> | any
 ) => VNode;
 type renderFunction = (c: createElementFunction) => VNode;
 

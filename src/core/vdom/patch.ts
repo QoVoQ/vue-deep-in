@@ -399,7 +399,7 @@ export function createPatchFunction(backend: {
   // are already rendered on the client or has no need for initialization
   // Note: style is excluded because it relies on initial clone for future
   // deep updates (#7063).
-  const isRenderedModule = makeMap("attrs,class,staticClass,staticStyle,key");
+  const isRenderedModule = makeMap("attrs,class,staticStyle,key");
 
   const checkNodeType = (node: VNode | Element) => {
     const elm = node as Element;

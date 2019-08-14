@@ -31,7 +31,7 @@ class VNode {
     elm?: Element | Text | Comment,
     context?: Component
   ) {
-    this.key = this.data && this.data.key;
+    this.key = this.data && this.data.key && String(this.data.key);
     this.tag = tag;
     this.data = data;
     this.text = text;

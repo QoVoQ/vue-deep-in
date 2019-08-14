@@ -1,5 +1,6 @@
 import {Component} from "../instance";
 import {VNode} from "./VNode";
+import {DOMClass} from "src/web/util/class";
 export interface IFnToInvoke extends Function {
   handler: Function;
 }
@@ -15,10 +16,9 @@ export interface IDOMListener {
   fnToInvoke?: IFnToInvoke;
 }
 export interface IVNodeData {
-  key?: string;
+  key?: string | number;
   tag?: string;
-  class?: string;
-  staticClass?: string;
+  class?: DOMClass;
   style?: object;
   staticStyle?: string;
   normalizedStyle?: object;

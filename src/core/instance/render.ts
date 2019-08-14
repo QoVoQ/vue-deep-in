@@ -61,7 +61,7 @@ export function initRender(vm: Component) {
   // @TODO fn _c deletable??
   vm._c = (a, b, c) => createElement(vm, a, b, c);
 
-  vm.$createElement = (a, b, c) => createElement(vm, a, b, c);
+  vm.$createElement = (a, b, c?) => createElement(vm, a, b, c);
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOC using them are always updated

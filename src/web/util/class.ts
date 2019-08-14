@@ -2,6 +2,20 @@ import {VNode} from "src/core/vdom/VNode";
 import {IVNodeData} from "src/core/vdom/definition";
 import {isDef, isObject} from "src/shared/util";
 
+// const vnode = new VNode("p", {
+//   class: [
+//     { class1: false, class2: true, class3: false },
+//     "class4",
+//     ["class5", "class6"]
+//   ]
+// });
+type DOMClassPrimitive = string;
+type DOMClassMap = {[key: string]: boolean};
+type DOMClassArray = Array<
+  DOMClassPrimitive | DOMClassMap | Array<DOMClassPrimitive | DOMClassMap>
+>;
+export type DOMClass = DOMClassPrimitive | DOMClassMap | DOMClassArray;
+
 export function genClassForVnode(vnode: VNode): string {
   let data = vnode.data;
   let parentNode = vnode;
@@ -18,27 +32,24 @@ export function genClassForVnode(vnode: VNode): string {
       data = mergeClassData(data, parentNode.data);
     }
   }
-  return renderClass(data.staticClass, data.class);
+  return renderClass(data.class);
 }
 
 function mergeClassData(
   child: IVNodeData,
   parent: IVNodeData
 ): {
-  staticClass: string;
-  class: any;
+  class: DOMClass;
 } {
   return {
-    staticClass: concat(child.staticClass, parent.staticClass),
-    class: isDef(child.class) ? [child.class, parent.class] : parent.class
+    class: (isDef(child.class)
+      ? [child.class, parent.class]
+      : parent.class) as DOMClass
   };
 }
-export function renderClass(
-  staticClass: string = "",
-  dynamicClass: any
-): string {
-  if (isDef(staticClass) || isDef(dynamicClass)) {
-    return concat(staticClass, stringifyClass(dynamicClass));
+export function renderClass(dynamicClass: DOMClass): string {
+  if (isDef(dynamicClass)) {
+    return stringifyClass(dynamicClass);
   }
   return "";
 }
@@ -47,20 +58,20 @@ export function concat(a?: string, b?: string): string {
   return a ? (b ? a + " " + b : a) : b || "";
 }
 
-export function stringifyClass(value: any): string {
+export function stringifyClass(value: DOMClass): string {
   if (Array.isArray(value)) {
     return stringifyArray(value);
-  }
-  if (isObject(value)) {
-    return stringifyObject(value);
   }
   if (typeof value === "string") {
     return value;
   }
+  if (isObject(value)) {
+    return stringifyObject(value);
+  }
   return "";
 }
 
-function stringifyArray(value: Array<any>): string {
+function stringifyArray(value: DOMClassArray): string {
   let res = "";
   let stringified;
   for (let i = 0, l = value.length; i < l; i++) {
@@ -72,7 +83,7 @@ function stringifyArray(value: Array<any>): string {
   return res;
 }
 
-function stringifyObject(value: Object): string {
+function stringifyObject(value: DOMClassMap): string {
   let res = "";
   for (const key in value) {
     if (value[key]) {
