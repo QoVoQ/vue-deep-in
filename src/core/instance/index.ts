@@ -1,5 +1,5 @@
 import {VNode} from "../vdom/VNode";
-import {IDOMListener} from "../vdom/definition";
+import {IDOMListener, VNodeOn} from "../vdom/definition";
 
 type createElementFunction = (
   tag: string,
@@ -43,7 +43,7 @@ interface ICtorOptions extends ICtorUserOpt {
   parent?: Component;
   _propKeys?: string[];
   _componentTagName?: string;
-  _parentListeners?: {[key: string]: IDOMListener};
+  _parentListeners?: VNodeOn;
 
   // root vnode of a component, like <son/>,
   // vm.$options._parentVNode, vm.$vnode, childVNode.parent

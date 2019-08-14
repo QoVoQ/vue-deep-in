@@ -3,7 +3,7 @@ import {isDef, arrayRemove} from "src/shared/util";
 import {invokeWithErrorHandler} from "../util/error";
 import {updateListeners} from "../vdom/helpers/update-listeners";
 import {addListener, removeListener} from "src/web/runtime/modules/event";
-import {VNodeOn} from "../vdom/VNode";
+import {VNodeOn} from "../vdom/definition";
 
 export function initEvents(vm: Component) {
   vm._events = Object.create(null);
