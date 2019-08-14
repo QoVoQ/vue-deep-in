@@ -1,13 +1,9 @@
-/* @flow */
-
 import {getStyle, normalizeStyleBinding} from "src/web/util/style";
 import {isDef} from "src/shared/util";
 import {VNode} from "src/core/vdom/VNode";
 import {VNodeHookNames} from "./definition";
 
-const cssVarRE = /^--/;
-const importantRE = /\s*!important$/;
-const setProp = (el, name, val) => {
+const setProp = (el: HTMLElement, name: string, val) => {
   if (Array.isArray(val)) {
     // Support values array created by autoprefixer, e.g.
     // {display: ["-webkit-box","flex"]}
@@ -24,22 +20,13 @@ function updateStyle(oldVnode: VNode, vnode: VNode) {
   const data = vnode.data;
   const oldData = oldVnode.data;
 
-  if (
-    !isDef(data.staticStyle) &&
-    !isDef(data.style) &&
-    !isDef(oldData.staticStyle) &&
-    !isDef(oldData.style)
-  ) {
+  if (!isDef(data.style) && !isDef(oldData.style)) {
     return;
   }
 
-  let cur, name;
-  const el: any = vnode.elm;
-  const oldStaticStyle: any = oldData.staticStyle;
-  const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {};
+  const el = vnode.elm as HTMLElement;
 
-  // if static style exists, style binding already merged into it when doing normalizeStyleData
-  const oldStyle = oldStaticStyle || oldStyleBinding;
+  const oldStyle = oldData.normalizedStyle || oldData.style || {};
 
   const style = normalizeStyleBinding(vnode.data.style) || {};
 
@@ -50,15 +37,19 @@ function updateStyle(oldVnode: VNode, vnode: VNode) {
     ? Object.assign({}, style)
     : style;
 
+  // @TODO why only call `getStyle` on new style, but not old style?
   const newStyle = getStyle(vnode, true);
 
-  for (name in oldStyle) {
+  // remove old style
+  for (const name in oldStyle) {
     if (!isDef(newStyle[name])) {
       setProp(el, name, "");
     }
   }
-  for (name in newStyle) {
-    cur = newStyle[name];
+
+  // add new style
+  for (const name in newStyle) {
+    const cur = newStyle[name];
     if (cur !== oldStyle[name]) {
       setProp(el, name, cur);
     }

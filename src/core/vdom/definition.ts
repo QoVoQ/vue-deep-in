@@ -19,9 +19,8 @@ export interface IVNodeData {
   key?: string | number;
   tag?: string;
   class?: DOMClass;
-  style?: object;
-  staticStyle?: string;
-  normalizedStyle?: object;
+  style?: Partial<CSSStyleDeclaration> | Array<Partial<CSSStyleDeclaration>>;
+  normalizedStyle?: Partial<CSSStyleDeclaration>;
   attrs?: {
     [key: string]: any;
   };
