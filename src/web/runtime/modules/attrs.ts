@@ -1,6 +1,5 @@
 /* @flow */
 import {isDef} from "src/shared/util";
-
 import {VNode} from "src/core/vdom/VNode";
 import {isFalsyAttrValue} from "src/web/util";
 import {VNodeHookNames} from "./definition";
@@ -19,6 +18,7 @@ function updateAttrs(oldVnode: VNode, vnode: VNode) {
     attrs = vnode.data.attrs = Object.assign({}, attrs);
   }
 
+  // add new attrs
   for (key in attrs) {
     cur = attrs[key];
     old = oldAttrs[key];
@@ -27,6 +27,7 @@ function updateAttrs(oldVnode: VNode, vnode: VNode) {
     }
   }
 
+  // remove old attrs
   for (key in oldAttrs) {
     if (!isDef(attrs[key])) {
       setAttr(elm, key, false);
@@ -38,7 +39,11 @@ function setAttr(el: Element, key: string, value: any) {
   if (isFalsyAttrValue(value)) {
     el.removeAttribute(key);
   } else {
-    el.setAttribute(key, value);
+    if (key === "disabled") {
+      el.setAttribute(key, "disabled");
+    } else {
+      el.setAttribute(key, value);
+    }
   }
 }
 

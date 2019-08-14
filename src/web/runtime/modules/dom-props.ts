@@ -16,13 +16,14 @@ function updateDOMProps(oldVnode: VNode, vnode: VNode) {
   if (isDef(props.__ob__)) {
     props = vnode.data.domProps = Object.assign({}, props);
   }
-
+  // remove old props
   for (key in oldProps) {
     if (!(key in props)) {
       elm[key] = "";
     }
   }
 
+  // add new props
   for (key in props) {
     cur = props[key];
     // ignore children if the node has textContent or innerHTML,
