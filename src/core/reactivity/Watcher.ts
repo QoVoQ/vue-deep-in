@@ -21,7 +21,7 @@ class Watcher {
   value: any;
   getter: Function;
   target: Component;
-  cb: WatcherCallback;
+  cb?: WatcherCallback;
   // relations between Dep and Watcher is many-to-many
   // keep track of deps that contain current watcher, in order to add/remove dep
   deps: Array<Dep>;
@@ -38,7 +38,7 @@ class Watcher {
   constructor(
     target,
     keyExpOrFn: string | Function,
-    cb: WatcherCallback,
+    cb?: WatcherCallback,
     options?: IWatcherOptions,
     isRenderWatcher?: boolean
   ) {
@@ -61,7 +61,7 @@ class Watcher {
     this.newDeps = [];
     this.newDepIds = new Set();
     this.getter = parseGetter(keyExpOrFn);
-    this.cb = cb.bind(target);
+    this.cb = cb && cb.bind(target);
     this.keyExpOrFn = keyExpOrFn;
     this.value = this.lazy ? undefined : this.get();
   }

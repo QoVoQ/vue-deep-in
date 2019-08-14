@@ -2,10 +2,14 @@ import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
 import {def, hasOwn} from "src/shared/util";
 
+interface IObserved {
+  __ob__: Observer;
+  [key: string]: any;
+}
 class Observer {
   dep: Dep;
-  constructor(public value) {
-    this.dep = new Dep();
+  constructor(public value, depName?: string | number) {
+    this.dep = new Dep(`ObserverDep:${depName}`);
     def(value, "__ob__", this);
 
     if (Array.isArray(value)) {
@@ -40,8 +44,8 @@ function defineReactivity(target: object, key: string | number, value?: any) {
   }
   // manage dependency in key's setter and getter
   const dep = new Dep(String(key));
-  // manage dependency for set/del
-  let childOb = observe(value);
+  // manage dependency for set/del operation on `value` obj
+  let childOb = observe(value, key);
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
@@ -67,13 +71,13 @@ function defineReactivity(target: object, key: string | number, value?: any) {
         oldSet.call(target, newValue);
       }
       value = newValue;
-      childOb = observe(value);
+      childOb = observe(value, key);
       dep.notify();
     }
   });
 }
 
-function observe(val): Observer {
+function observe(val, keyName?: string | number): Observer {
   // ignore when input is not an obj || is a vue instance || is a frozen obj
   if (typeof val !== "object" || val._isVue || !Object.isExtensible(val)) {
     return;
@@ -83,13 +87,13 @@ function observe(val): Observer {
     return val.__ob__;
   }
 
-  const ob = new Observer(val);
+  const ob = new Observer(val, keyName);
   return ob;
 }
 
 function observeArray(val) {
-  for (const ele of val) {
-    observe(ele);
+  for (let i = 0; i < val.length; i++) {
+    observe(val[i], i);
   }
 }
 
@@ -112,7 +116,7 @@ function set(target: object, key: string | number, val: any): any {
     target[key] = val;
     return val;
   }
-  const ob = observe(target);
+  const ob = observe(target, key);
   if (!ob) {
     target[key] = val;
     return val;
@@ -122,7 +126,7 @@ function set(target: object, key: string | number, val: any): any {
   return val;
 }
 
-function del(target: object, key: string | number) {
+function del(target: object | IObserved, key: string | number) {
   if (Array.isArray(target) && typeof key === "number") {
     target.splice(Number(key), 1);
     return;
@@ -131,7 +135,7 @@ function del(target: object, key: string | number) {
   if (!hasOwn(target, key)) {
     return;
   }
-  const ob = (target as any).__ob__;
+  const ob = (target as IObserved).__ob__;
 
   delete target[key];
   if (ob) {
@@ -139,7 +143,7 @@ function del(target: object, key: string | number) {
   }
 }
 
-export {Observer, observeArray, defineReactivity, observe, set, del};
+export {IObserved, Observer, observeArray, defineReactivity, observe, set, del};
 
 /**
  * const obj = { name: "Tom" }

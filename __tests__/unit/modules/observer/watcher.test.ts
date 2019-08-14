@@ -82,7 +82,7 @@ describe("Watcher", () => {
 
   it("deep watch", done => {
     let oldB;
-    new Watcher(vm, "b", spy, {
+    const w = new Watcher(vm, "b", spy, {
       deep: true
     });
     vm.b.c = {d: 4};
@@ -103,14 +103,15 @@ describe("Watcher", () => {
       .then(done);
   });
 
-  it("deep watch $data", done => {
+  it("deep watch data", done => {
     new Watcher(vm, "$data", spy, {
       deep: true
     });
     vm.b.c = 3;
-    waitForUpdate(() => {
+    setTimeout(() => {
       expect(spy).toHaveBeenCalledWith(vm.$data, vm.$data);
-    }).then(done);
+      done();
+    }, 100);
   });
 
   it("deep watch with circular references", done => {
