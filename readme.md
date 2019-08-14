@@ -1,5 +1,7 @@
-# Sth learned
+# Typescript version of Vue
 
-## code style
+## Sth Learned
+
+### code style
 
 - always execute user defined function in a try-catch block
