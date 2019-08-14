@@ -1,16 +1,20 @@
 import {isDef} from "src/shared/util";
-import {VNodeOn} from "../VNode";
-import {IDOMListener, IFnToInvoke} from "../definition";
+import {IDOMListener, VNodeOn} from "../definition";
 import {addListener, removeListener} from "src/web/runtime/modules/event";
 import {Component} from "src/core/instance";
 
-export function createFnInvoker(fn: Function, vm?: Component): IFnToInvoke {
-  function invoker() {
-    const fn = invoker.handler;
-    fn.apply(vm, arguments);
+export function createFnInvoker(
+  handler: IDOMListener,
+  vm?: Component
+): IDOMListener {
+  if (handler.fnToInvoke) {
+    return handler;
   }
-  invoker.handler = fn;
-  return invoker;
+  function invoker() {
+    handler.apply(vm, arguments);
+  }
+  handler.fnToInvoke = invoker;
+  return handler;
 }
 
 export function updateListeners(
@@ -20,23 +24,38 @@ export function updateListeners(
   remove: removeListener,
   vm: Component
 ) {
-  let eventName: string, curHandler: IDOMListener, oldHandler: IDOMListener;
-  for (eventName in on) {
-    curHandler = on[name];
-    oldHandler = oldOn[name];
+  for (const eventName in on) {
+    const curHandlers = on[eventName];
+    const oldHandlers = oldOn[eventName];
 
-    if (!isDef(oldHandler)) {
-      const invoker = createFnInvoker(curHandler.handler, vm);
-      curHandler.fnToInvoke = invoker;
-      add(eventName, invoker);
-    } else if (curHandler !== oldHandler) {
-      oldHandler.fnToInvoke.handler = curHandler.handler;
+    // add new listeners
+    if (!isDef(oldHandlers)) {
+      curHandlers.forEach(handler => {
+        createFnInvoker(handler, vm);
+        add(eventName, handler.fnToInvoke);
+      });
+    } else {
+      curHandlers.forEach(cur => {
+        if (oldHandlers.indexOf(cur) === -1) {
+          createFnInvoker(cur, vm);
+          add(eventName, cur.fnToInvoke);
+        }
+      });
     }
   }
 
-  for (eventName in oldOn) {
+  // remove old listeners
+  for (const eventName in oldOn) {
     if (!isDef(on[eventName])) {
-      remove(eventName, oldOn[name].fnToInvoke);
+      oldOn[eventName].forEach(old => {
+        remove(eventName, old.fnToInvoke);
+      });
+    } else {
+      oldOn[eventName].forEach(old => {
+        if (on[eventName].indexOf(old) === -1) {
+          remove(eventName, old.fnToInvoke);
+        }
+      });
     }
   }
 }

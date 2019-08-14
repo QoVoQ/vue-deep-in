@@ -72,7 +72,7 @@ export function remove(arr: Array<any>, item: any): Array<any> | void {
 /**
  * Merge an Array of Objects into a single Object.
  */
-export function toObject(arr: Array<any>): Object {
+function toObject(arr: Array<any>): Object {
   const res = {};
   for (let i = 0; i < arr.length; i++) {
     if (arr[i]) {
@@ -86,6 +86,24 @@ function hasOwn(target: object, key: string | number) {
   return Object.hasOwnProperty.call(target, key);
 }
 
+function toString(val): string {
+  return val == null
+    ? ""
+    : Array.isArray(val) || isPlainObject(val)
+    ? JSON.stringify(val, null, 2)
+    : String(val);
+}
+
+function triggerEvent(target: HTMLElement, name: string, process?: Function) {
+  const e = document.createEvent("HTMLEvents");
+  e.initEvent(name, true, true);
+  if (name === "click") {
+    (e as any).button = 0;
+  }
+  typeof process === "function" && process(e);
+  target.dispatchEvent(e);
+}
+
 function isDef(val): boolean {
   return val !== null && val !== undefined;
 }
@@ -96,14 +114,6 @@ function isObject(obj): boolean {
 
 function isPlainObject(obj): boolean {
   return _toString.call(obj) === "[object Object]";
-}
-
-function toString(val): string {
-  return val == null
-    ? ""
-    : Array.isArray(val) || isPlainObject(val)
-    ? JSON.stringify(val, null, 2)
-    : String(val);
 }
 
 function isPrimitive(val): boolean {
@@ -139,5 +149,7 @@ export {
   isPrimitive,
   toString,
   hasOwn,
-  waitForUpdate
+  toObject,
+  waitForUpdate,
+  triggerEvent
 };

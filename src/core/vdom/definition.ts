@@ -1,9 +1,7 @@
 import {Component} from "../instance";
 import {VNode} from "./VNode";
 import {DOMClass} from "src/web/util/class";
-export interface IFnToInvoke extends Function {
-  handler: Function;
-}
+
 export interface IComponentOptions {
   Ctor: new () => Component;
   propsData?: Object;
@@ -11,10 +9,10 @@ export interface IComponentOptions {
   children?: Array<VNode>;
   tag?: string;
 }
-export interface IDOMListener {
-  handler: Function;
-  fnToInvoke?: IFnToInvoke;
+export interface IDOMListener extends Function {
+  fnToInvoke?: Function;
 }
+export type VNodeOn = {[key: string]: IDOMListener[]};
 export interface IVNodeData {
   key?: string | number;
   tag?: string;
@@ -28,9 +26,7 @@ export interface IVNodeData {
   nativeOn?: {
     [key: string]: Function;
   };
-  on?: {
-    [key: string]: IDOMListener;
-  };
+  on?: VNodeOn;
   props?: object;
   hook?: {
     [key: string]: Function;

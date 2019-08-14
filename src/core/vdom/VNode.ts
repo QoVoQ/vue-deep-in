@@ -5,22 +5,14 @@ import {toString} from "src/shared/util";
 class VNode {
   tag?: string;
   data?: IVNodeData;
-
   children?: Array<VNode>;
-
   elm?: Element | Comment | Text;
-
   key?: string;
-
   parent?: VNode;
-
   text?: string;
-
   isComment?: boolean;
-
   context?: Component;
   isCloned?: boolean;
-
   componentInstance?: Component;
   componentOptions?: IComponentOptions;
   constructor(
@@ -69,13 +61,4 @@ function createTextVNode(text: any): VNode {
   return new VNode(undefined, undefined, undefined, toString(text));
 }
 
-type VNodeOn = {[key: string]: IDOMListener};
-
-export {
-  IVNodeData,
-  IDOMListener,
-  VNode,
-  createEmptyVNode,
-  createTextVNode,
-  VNodeOn
-};
+export {IVNodeData, IDOMListener, VNode, createEmptyVNode, createTextVNode};
