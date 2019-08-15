@@ -12,6 +12,10 @@ const vm = new Vue({
     return h(
       "div",
       {
+        style: {
+          backgroundColor: "red",
+          width: `${this.width}px`
+        },
         on: {
           click: [clickHandler]
         }
@@ -19,18 +23,13 @@ const vm = new Vue({
       [this.b]
     );
   },
-  data: {b: {c: 1}}
+  data: {b: {c: 1}, width: 100},
+  mounted() {
+    setInterval(() => {
+      this.width += 10;
+    }, 1000);
+  }
 });
-``;
-new Watcher(
-  vm,
-  "$data",
-  (newVal, oldVal) => {
-    console.log(newVal);
-    console.log(newVal === oldVal);
-  },
-  {deep: true}
-);
 
 (vm as any).b.c = 3;
 console.log((vm as any).$data);

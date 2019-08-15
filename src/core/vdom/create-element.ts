@@ -27,25 +27,25 @@ export function createElement(
     );
 
     if (isDef(vnode)) {
-      if (isDef(data)) registerDeepBindings(data);
+      // if (isDef(data)) registerDeepBindings(data);
       return vnode;
     } else {
       return createEmptyVNode();
     }
   }
 }
-
+// @TODO can be remove???
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
-function registerDeepBindings(data) {
-  if (isObject(data.style)) {
-    traverse(data.style);
-  }
-  if (isObject(data.class)) {
-    traverse(data.class);
-  }
-}
+// function registerDeepBindings(data) {
+//   if (isObject(data.style)) {
+//     traverse(data.style);
+//   }
+//   if (isObject(data.class)) {
+//     traverse(data.class);
+//   }
+// }
 
 function normalizeChildren(children: any[]): VNode[] {
   return Array.isArray(children)
