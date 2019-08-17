@@ -1,6 +1,8 @@
 import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
-import {def, hasOwn} from "src/shared/util";
+import {def, hasOwn, isPrimitive, isPlainObject} from "src/shared/util";
+import {isObject} from "util";
+import {VNode} from "../vdom/VNode";
 
 let shouldObserve: boolean = true;
 export function toggleObserving(state: boolean) {
@@ -82,17 +84,22 @@ function defineReactivity(target: object, key: string | number, value?: any) {
 }
 
 function observe(val: IObserved, keyName?: string | number): Observer {
-  // ignore when input is not an obj || is a vue instance || is a frozen obj
-  if (typeof val !== "object" || val._isVue || !Object.isExtensible(val)) {
+  if (!isObject(val) || val instanceof VNode) {
     return;
   }
 
   if (val.__ob__) {
     return val.__ob__;
   }
+  // ignore when input is not an obj || is a vue instance || is a frozen obj
 
   let ob: Observer;
-  if (shouldObserve) {
+  if (
+    shouldObserve &&
+    (isPlainObject(val) || Array.isArray(val)) &&
+    Object.isExtensible(val) &&
+    !val._isVue
+  ) {
     ob = new Observer(val, keyName);
   }
   return ob;

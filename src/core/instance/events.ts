@@ -32,8 +32,8 @@ const remove: removeListener = (name, fn) => {
 
 export function updateComponentListeners(
   vm: Component,
-  newOn: VNodeOn,
-  oldOn: VNodeOn
+  newOn: VNodeOn = {},
+  oldOn: VNodeOn = {}
 ) {
   target = vm;
   updateListeners(newOn, oldOn, add, remove, vm);

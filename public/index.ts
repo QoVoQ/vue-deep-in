@@ -2,7 +2,6 @@ import Vue from "src";
 import Component from "packages/vue-class-component/src";
 import {Watcher} from "src/core/reactivity/Watcher";
 function clickHandler(e) {
-  console.log(this.b.c);
   console.log(e);
   console.log("clicked.");
 }
@@ -13,31 +12,54 @@ const vm = new Vue({
       props: {
         age: {type: [Number]}
       },
+      data() {
+        return {
+          timer: null
+        };
+      },
       render(h) {
-        return h("div", {}, ["Hello from child component.", this.age]);
+        return h("div", {}, ["Hello from mylabel component.", this.age]);
+      },
+      mounted() {
+        this.timer = setInterval(() => {
+          this.$emit("click", {msg: "custom click event"});
+        }, 1000);
+      },
+      beforeDestroy() {
+        console.log("timer cleaned");
+        clearInterval(this.timer);
+      }
+    },
+    YourLabel: {
+      props: {
+        age: {type: [Number]}
+      },
+      render(h) {
+        return h("div", {}, ["Hello from yourlabel component.", this.age]);
       }
     }
   },
   render(h) {
+    const child =
+      this.width % 2 === 0
+        ? h("MyLabel", {on: {click: [clickHandler]}, props: {age: this.width}})
+        : h("YourLabel", {props: {age: this.width}});
     return h(
       "div",
       {
         style: {
           backgroundColor: "red",
           width: `${this.width}px`
-        },
-        on: {
-          click: [clickHandler]
         }
       },
-      [this.b, h("MyLabel", {props: {age: this.width}})]
+      [this.b, child]
     );
   },
   data: {b: {c: 1}, width: 100},
   mounted() {
     setInterval(() => {
-      this.width += 10;
-    }, 1000);
+      this.width += 11;
+    }, 3000);
   }
 });
 

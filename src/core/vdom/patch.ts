@@ -119,6 +119,7 @@ export function createPatchFunction(backend: {
           // invoke destroy hook
           // it seems destroy work was done in the hook
           removeNode(ch.elm);
+          invokeDestroyHook(ch);
         } else {
           // Text node
           removeNode(ch.elm);
