@@ -21,7 +21,8 @@ class VNode {
     children?: Array<VNode>,
     text?: string,
     elm?: Element | Text | Comment,
-    context?: Component
+    context?: Component,
+    componentOptions?: IComponentOptions
   ) {
     this.key = this.data && this.data.key && String(this.data.key);
     this.tag = tag;
@@ -31,6 +32,7 @@ class VNode {
     this.elm = elm;
     this.context = context;
     this.children = children;
+    this.componentOptions = componentOptions;
   }
 
   clone(): VNode {

@@ -1,5 +1,5 @@
 import {VNode} from "../vdom/VNode";
-import {IDOMListener, VNodeOn} from "../vdom/definition";
+import {VNodeOn} from "../vdom/definition";
 
 type createElementFunction = (
   tag: string,
@@ -8,8 +8,10 @@ type createElementFunction = (
 ) => VNode;
 type renderFunction = (c: createElementFunction) => VNode;
 
+type propsOptions = {[key: string]: {type: Function[]}};
+
 interface ICtorUserOpt {
-  props?: any;
+  props?: propsOptions;
   methods?: {[key: string]: Function};
   computed?: {[key: string]: Function};
   watch?: {
@@ -20,13 +22,13 @@ interface ICtorUserOpt {
   };
   name?: string;
   el?: Element | string;
-  components?: object;
+  components?: {[key: string]: ICtorUserOpt | typeof Vue};
   propsData?: object;
   data?: object | (() => object);
 
   render?: renderFunction;
 
-  mixins?: ICtorOptions[];
+  mixins?: Partial<ICtorOptions>[];
 
   [ComponentLifecycleName.beforeCreate]?: Function | Function[];
   [ComponentLifecycleName.created]?: Function | Function[];
@@ -38,28 +40,29 @@ interface ICtorUserOpt {
   // user defined options
   [key: string]: any;
 }
-
-interface ICtorOptions extends ICtorUserOpt {
-  parent?: Component;
-  _propKeys?: string[];
-  _componentTagName?: string;
-  _parentListeners?: VNodeOn;
-
+interface IInternalComponentOptions {
+  _isComponent: true;
+  parent: Component;
   // root vnode of a component, like <son/>,
   // vm.$options._parentVNode, vm.$vnode, childVNode.parent
   // it has attributes 'componentInstance' and 'componentOptions'
-  _parentVNode?: VNode;
+  _parentVnode: VNode;
+
+  // related to slot
+  render?: renderFunction;
+  staticRenderFns?: Array<Function>;
+}
+interface ICtorOptions extends ICtorUserOpt, IInternalComponentOptions {
+  _propKeys?: string[];
+  _componentTagName?: string;
+  _parentListeners?: VNodeOn;
+  _renderChildren?: VNode[];
 }
 type Component = Vue;
 
 import {vueProto_init, initMixin} from "./init";
 import {vueProto$watch, stateMixin} from "./state";
-import {
-  vueProto_render,
-  vueProto$nextTick,
-  renderMixin,
-  I$createElement
-} from "./render";
+import {vueProto_render, vueProto$nextTick, renderMixin} from "./render";
 import {
   vueProto$on,
   vueProto$emit,
@@ -74,7 +77,7 @@ import {
   vueProto$forceUpdate,
   lifecycleMixin
 } from "./lifecycle";
-import {Watcher, set, del, IWatcherOptions} from "../reactivity";
+import {Watcher, set, del} from "../reactivity";
 import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
 import {ctorExtend} from "../global-api/extend";
@@ -89,7 +92,7 @@ class Vue {
   _uid: number;
 
   _self: Vue;
-
+  // vnode of current mounted element
   _vnode?: VNode;
 
   _events?: {[key: string]: Array<Function>};
@@ -110,7 +113,9 @@ class Vue {
 
   _watchers?: Array<Watcher>;
 
-  $attr?: object;
+  $attrs?: object;
+
+  $listeners?: object;
 
   $children?: Array<Component>;
 
@@ -133,7 +138,7 @@ class Vue {
     warn("$props is readonly");
   }
   $el?: Element;
-  $options?: Partial<ICtorOptions>;
+  $options?: Partial<ICtorUserOpt> & {_base?: typeof Vue};
 
   $parent?: Component;
 
@@ -143,7 +148,7 @@ class Vue {
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 
-  constructor(opts?: ICtorUserOpt) {
+  constructor(opts?: Partial<ICtorOptions>) {
     this._init(opts);
   }
 
@@ -178,4 +183,11 @@ renderMixin(Vue);
 stateMixin(Vue);
 export default Vue;
 
-export {Vue, Component, ICtorUserOpt, ICtorOptions};
+export {
+  Vue,
+  Component,
+  ICtorUserOpt,
+  ICtorOptions,
+  propsOptions,
+  IInternalComponentOptions
+};

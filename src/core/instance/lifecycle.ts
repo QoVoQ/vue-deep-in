@@ -3,7 +3,10 @@ import {invokeWithErrorHandler} from "../util/error";
 import {VNode} from "../vdom/VNode";
 import {remove, noop, isDef} from "src/shared/util";
 import {Watcher} from "../reactivity/Watcher";
-import {pushTarget, popTarget} from "../reactivity";
+import {pushTarget, popTarget, toggleObserving} from "../reactivity";
+import {updateComponentListeners} from "./events";
+import {VNodeOn} from "../vdom/definition";
+import {validateProp} from "../util/props";
 
 export enum ComponentLifecycleName {
   beforeCreate = "beforeCreate",
@@ -139,6 +142,52 @@ export function mountComponent(vm: Component, el?: Element): Component {
   }
   return vm;
 }
+
+export function updateChildComponent(
+  vm: Component,
+  propsData: object = {},
+  listeners: VNodeOn,
+  parentVnode: VNode,
+  renderChildren?: Array<VNode>
+) {
+  vm.$options._parentVnode = parentVnode;
+  vm.$vnode = parentVnode; // update vm's placeholder node without re-render
+
+  if (vm._vnode) {
+    // update child tree's parent
+    vm._vnode.parent = parentVnode;
+  }
+  // related to slot
+  vm.$options._renderChildren = renderChildren;
+
+  // update $attrs and $listeners hash
+  // these are also reactive so they may trigger child update if the child
+  // used them during render
+  vm.$attrs = parentVnode.data.attrs || {};
+  vm.$listeners = listeners || {};
+
+  // update props
+  if (propsData && vm.$options.props) {
+    toggleObserving(false);
+    const props = vm._props;
+    const propKeys = vm.$options._propKeys || [];
+    for (let i = 0; i < propKeys.length; i++) {
+      const key = propKeys[i];
+      const propOptions = vm.$options.props;
+      props[key] = validateProp(key, propOptions, propsData, vm);
+    }
+    toggleObserving(true);
+    // keep a copy of raw propsData
+    vm.$options.propsData = propsData;
+  }
+
+  // update listeners
+  listeners = listeners || {};
+  const oldListeners = vm.$options._parentListeners;
+  vm.$options._parentListeners = listeners;
+  updateComponentListeners(vm, listeners, oldListeners);
+}
+
 export function callHook(vm: Component, hookName: ComponentLifecycleName) {
   pushTarget();
   let fns = vm.$options[hookName];

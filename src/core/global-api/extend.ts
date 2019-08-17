@@ -11,7 +11,7 @@ export function ctorExtend(extendOptions: Partial<ICtorUserOpt>): typeof Vue {
 
   Sub.super = Super;
 
-  Sub.options = mergeOptions(Super.options || {}, extendOptions);
+  Sub.options = mergeOptions(Super.options, extendOptions);
   if (name) {
     (Sub.options.components || (Sub.options.components = {}))[name] = Sub;
   }

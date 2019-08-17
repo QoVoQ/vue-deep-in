@@ -47,6 +47,7 @@
     - [x] Initialization of options `watch`
 
 - [ ] Component
+  - [ ] basic
   - [ ] Keep-alive
   - [ ] slot
   - [ ] scoped-slot

@@ -3,9 +3,9 @@ import {VNode} from "./VNode";
 import {DOMClass} from "src/web/util/class";
 
 export interface IComponentOptions {
-  Ctor: new () => Component;
+  Ctor: new (...args) => Component;
   propsData?: Object;
-  listeners?: Object;
+  listeners?: VNodeOn;
   children?: Array<VNode>;
   tag?: string;
 }
@@ -23,12 +23,12 @@ export interface IVNodeData {
     [key: string]: any;
   };
   domProps?: object;
-  nativeOn?: {
-    [key: string]: Function;
-  };
+  nativeOn?: VNodeOn;
   on?: VNodeOn;
+  // values assigned to components' props
   props?: object;
   hook?: {
     [key: string]: Function;
   };
+  pendingInsert?: VNode[];
 }

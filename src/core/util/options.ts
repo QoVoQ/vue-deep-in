@@ -1,6 +1,7 @@
 import Vue, {Component, ICtorUserOpt} from "src";
 import {ComponentLifecycleName} from "../instance/lifecycle";
-import {isDef, isPlainObject} from "src/shared/util";
+import {isDef, isPlainObject, hasOwn} from "src/shared/util";
+import {AssetTypes} from "src/shared/constants";
 
 const mergeStrategy: {[key: string]: Function} = Object.create(null);
 
@@ -22,7 +23,7 @@ function mergeData(to: object, from?: object): object {
       continue;
     }
 
-    if (!to.hasOwnProperty(key)) {
+    if (!hasOwn(to, key)) {
       to[key] = from[key];
     } else if (
       isPlainObject(to[key]) &&
@@ -98,6 +99,17 @@ function dedupeHooks(hooks) {
 Object.keys(ComponentLifecycleName).forEach(hook => {
   mergeStrategy[hook] = mergeHook;
 });
+
+function mergeAssets(parentVal?, childVal?) {
+  const res = Object.create(parentVal || null);
+  Object.assign(res, childVal);
+  return res;
+}
+
+Object.keys(AssetTypes).forEach(key => {
+  mergeStrategy[`${key}s`] = mergeAssets;
+});
+
 mergeStrategy.watch = function(parentVal?, childVal?): object {
   if (!childVal) {
     return parentVal;
@@ -161,7 +173,7 @@ export function mergeOptions(
   }
 
   for (let p in optChild) {
-    if (!optParent.hasOwnProperty(p)) {
+    if (!hasOwn(optParent, p)) {
       mergeField(p);
     }
   }

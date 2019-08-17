@@ -2,9 +2,13 @@ import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
 import {def, hasOwn} from "src/shared/util";
 
+let shouldObserve: boolean = true;
+export function toggleObserving(state: boolean) {
+  shouldObserve = state;
+}
 interface IObserved {
-  __ob__: Observer;
   [key: string]: any;
+  __ob__?: Observer;
 }
 class Observer {
   dep: Dep;
@@ -77,7 +81,7 @@ function defineReactivity(target: object, key: string | number, value?: any) {
   });
 }
 
-function observe(val, keyName?: string | number): Observer {
+function observe(val: IObserved, keyName?: string | number): Observer {
   // ignore when input is not an obj || is a vue instance || is a frozen obj
   if (typeof val !== "object" || val._isVue || !Object.isExtensible(val)) {
     return;
@@ -87,7 +91,10 @@ function observe(val, keyName?: string | number): Observer {
     return val.__ob__;
   }
 
-  const ob = new Observer(val, keyName);
+  let ob: Observer;
+  if (shouldObserve) {
+    ob = new Observer(val, keyName);
+  }
   return ob;
 }
 
@@ -106,7 +113,7 @@ function dependArray(arr: Array<any>) {
   });
 }
 
-function set(target: object, key: string | number, val: any): any {
+function set(target: IObserved, key: string | number, val: any): any {
   if (Array.isArray(target) && typeof key === "number") {
     target.splice(Number(key), 1, val);
     return val;
@@ -126,7 +133,7 @@ function set(target: object, key: string | number, val: any): any {
   return val;
 }
 
-function del(target: object | IObserved, key: string | number) {
+function del(target: IObserved, key: string | number) {
   if (Array.isArray(target) && typeof key === "number") {
     target.splice(Number(key), 1);
     return;
@@ -135,7 +142,7 @@ function del(target: object | IObserved, key: string | number) {
   if (!hasOwn(target, key)) {
     return;
   }
-  const ob = (target as IObserved).__ob__;
+  const ob = target.__ob__;
 
   delete target[key];
   if (ob) {

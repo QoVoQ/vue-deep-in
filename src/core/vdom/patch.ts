@@ -60,60 +60,11 @@ export function createPatchFunction(backend: {
     );
   }
 
-  function createRmCb(childElm: Node, listeners: number) {
-    function remove() {
-      if (--remove.listeners === 0) {
-        removeNode(childElm);
-      }
-    }
-    remove.listeners = listeners;
-    return remove;
-  }
-
   function removeNode(el: Node) {
     const parent = nodeOps.parentNode(el);
     // element may have already been removed due to v-html / v-text
     if (isDef(parent)) {
       nodeOps.removeChild(parent, el);
-    }
-  }
-
-  /**
-   * constructor DOM tree according VNode
-   */
-  function createElm(
-    vnode: VNode,
-    insertedVnodeQueue: Array<VNode>,
-    parentElm?: Node,
-    refElm?: Node,
-    ownerArray?: Array<VNode>,
-    index?: number
-  ) {
-    if (isDef(vnode.elm) && isDef(ownerArray)) {
-      // This vnode was used in a previous render!
-      // now it's used as a new node, overwriting its elm would cause
-      // potential patch errors down the road when it's used as an insertion
-      // reference node. Instead, we clone the node on-demand before creating
-      // associated DOM element for it.
-      vnode = ownerArray[index] = vnode.clone();
-    }
-
-    const children = vnode.children;
-    const tag = vnode.tag;
-    if (isDef(tag)) {
-      vnode.elm = nodeOps.createElement(tag);
-      createChildren(vnode, children, insertedVnodeQueue);
-      // invoke create hook
-      if (isDef(vnode.data)) {
-        invokeCreateHooks(vnode, insertedVnodeQueue);
-      }
-      insert(parentElm, vnode.elm, refElm);
-    } else if (vnode.isComment) {
-      vnode.elm = nodeOps.createComment(String(vnode.text));
-      insert(parentElm, vnode.elm, refElm);
-    } else {
-      vnode.elm = nodeOps.createTextNode(String(vnode.text));
-      insert(parentElm, vnode.elm, refElm);
     }
   }
 
@@ -129,38 +80,7 @@ export function createPatchFunction(backend: {
     }
   }
 
-  function invokeCreateHooks(vnode: VNode, insertedVnodeQueue: Array<VNode>) {
-    for (let i = 0; i < moduleCbs[VNodeHookNames.create].length; ++i) {
-      moduleCbs[VNodeHookNames.create][i](emptyNode, vnode);
-    }
-    const vnodeHook = vnode.data.hook;
-    if (isDef(vnodeHook)) {
-      if (isDef(vnodeHook.create)) vnodeHook.create(emptyNode, vnode);
-      if (isDef(vnodeHook.insert)) insertedVnodeQueue.push(vnode);
-    }
-  }
-
-  function createChildren(vnode, children, insertedVnodeQueue) {
-    if (Array.isArray(children)) {
-      for (let i = 0; i < children.length; ++i) {
-        createElm(
-          children[i],
-          insertedVnodeQueue,
-          vnode.elm,
-          null,
-          children,
-          i
-        );
-      }
-    } else if (isPrimitive(vnode.text)) {
-      nodeOps.appendChild(
-        vnode.elm,
-        nodeOps.createTextNode(String(vnode.text))
-      );
-    }
-  }
-
-  function isPatchable(vnode) {
+  function isPatchable(vnode: VNode) {
     while (vnode.componentInstance) {
       vnode = vnode.componentInstance._vnode;
     }
@@ -204,6 +124,114 @@ export function createPatchFunction(backend: {
           removeNode(ch.elm);
         }
       }
+    }
+  }
+
+  /**
+   * constructor DOM tree according VNode
+   */
+  function createElm(
+    vnode: VNode,
+    insertedVnodeQueue: Array<VNode>,
+    parentElm?: Node,
+    refElm?: Node,
+    ownerArray?: Array<VNode>,
+    index?: number
+  ) {
+    if (isDef(vnode.elm) && isDef(ownerArray)) {
+      // This vnode was used in a previous render!
+      // now it's used as a new node, overwriting its elm would cause
+      // potential patch errors down the road when it's used as an insertion
+      // reference node. Instead, we clone the node on-demand before creating
+      // associated DOM element for it.
+      vnode = ownerArray[index] = vnode.clone();
+    }
+
+    if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
+      return;
+    }
+
+    const children = vnode.children;
+    const tag = vnode.tag;
+    if (isDef(tag)) {
+      vnode.elm = nodeOps.createElement(tag);
+      createChildren(vnode, children, insertedVnodeQueue);
+      // invoke create hook
+      if (isDef(vnode.data)) {
+        invokeCreateHooks(vnode, insertedVnodeQueue);
+      }
+      insert(parentElm, vnode.elm, refElm);
+    } else if (vnode.isComment) {
+      vnode.elm = nodeOps.createComment(String(vnode.text));
+      insert(parentElm, vnode.elm, refElm);
+    } else {
+      vnode.elm = nodeOps.createTextNode(String(vnode.text));
+      insert(parentElm, vnode.elm, refElm);
+    }
+  }
+
+  function createComponent(
+    vnode: VNode,
+    insertedVnodeQueue: VNode[],
+    parentElm: Node,
+    refElm: Node
+  ): boolean {
+    const data = vnode.data;
+    if (isDef(data)) {
+      if (isDef(data.hook) && isDef(data.hook.init)) {
+        data.hook.init(vnode);
+      }
+      // after calling the init hook, if the vnode is a child component
+      // it should've created a child instance and mounted it. the child
+      // component also has set the placeholder vnode's elm.
+      // in that case we can just return the element and be done.
+      if (isDef(vnode.componentInstance)) {
+        initComponent(vnode, insertedVnodeQueue);
+        insert(parentElm, vnode.elm, refElm);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function initComponent(vnode: VNode, insertedVnodeQueue: VNode[]) {
+    if (isDef(vnode.data.pendingInsert)) {
+      insertedVnodeQueue.push.apply(
+        insertedVnodeQueue,
+        vnode.data.pendingInsert
+      );
+      vnode.data.pendingInsert = null;
+    }
+    vnode.elm = vnode.componentInstance.$el;
+    if (isPatchable(vnode)) {
+      invokeCreateHooks(vnode, insertedVnodeQueue);
+    } else {
+      // empty component root.
+      insertedVnodeQueue.push(vnode);
+    }
+  }
+
+  function createChildren(
+    vnode: VNode,
+    children: VNode[],
+    insertedVnodeQueue: VNode[]
+  ) {
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; ++i) {
+        createElm(
+          children[i],
+          insertedVnodeQueue,
+          vnode.elm,
+          null,
+          children,
+          i
+        );
+      }
+    } else if (isPrimitive(vnode.text)) {
+      nodeOps.appendChild(
+        vnode.elm,
+        nodeOps.createTextNode(String(vnode.text))
+      );
     }
   }
 
@@ -362,6 +390,9 @@ export function createPatchFunction(backend: {
 
     const data = vnode.data;
     // invoke hook prepatch
+    if (isDef(data) && isDef(data.hook) && isDef(data.hook.prepatch)) {
+      data.hook.prepatch(oldVnode, vnode);
+    }
 
     const oldCh = oldVnode.children;
     const ch = vnode.children;
@@ -395,20 +426,16 @@ export function createPatchFunction(backend: {
     // invoke hook postpatch
   }
 
-  // list of modules that can skip create hook during hydration because they
-  // are already rendered on the client or has no need for initialization
-  // Note: style is excluded because it relies on initial clone for future
-  // deep updates (#7063).
-  const isRenderedModule = makeMap("attrs,class,staticStyle,key");
-
   const checkNodeType = (node: VNode | Element) => {
     const elm = node as Element;
     return isDef(elm.nodeType);
   };
+
   return function patch(oldVnode?: VNode | Element, vnode?: VNode) {
     if (!isDef(vnode)) {
       if (isDef(oldVnode)) {
         //invoke hook destroy
+        invokeDestroyHook(oldVnode as VNode);
       }
       return;
     }
@@ -447,45 +474,79 @@ export function createPatchFunction(backend: {
         );
 
         // update parent placeholder node element, recursively
-        // if (isDef(vnode.parent)) {
-        //   let ancestor = vnode.parent;
-        //   const patchable = isPatchable(vnode);
-        //   while (ancestor) {
-        //     for (let i = 0; i < cbs.destroy.length; ++i) {
-        //       cbs.destroy[i](ancestor);
-        //     }
-        //     ancestor.elm = vnode.elm;
-        //     if (patchable) {
-        //       for (let i = 0; i < cbs.create.length; ++i) {
-        //         cbs.create[i](emptyNode, ancestor);
-        //       }
-        //       // #6513
-        //       // invoke insert hooks that may have been merged by create hooks.
-        //       // e.g. for directives that uses the "inserted" hook.
-        //       const insert = ancestor.data.hook.insert;
-        //       if (insert.merged) {
-        //         // start at index 1 to avoid re-invoking component mounted hook
-        //         for (let i = 1; i < insert.fns.length; i++) {
-        //           insert.fns[i]();
-        //         }
-        //       }
-        //     } else {
-        //       registerRef(ancestor);
-        //     }
-        //     ancestor = ancestor.parent;
-        //   }
-        // }
+        if (isDef(vnode.parent)) {
+          let ancestor = vnode.parent;
+          const patchable = isPatchable(vnode);
+          while (ancestor) {
+            for (let i = 0; i < moduleCbs[VNodeHookNames.destroy].length; ++i) {
+              moduleCbs[VNodeHookNames.destroy][i](ancestor);
+            }
+            ancestor.elm = vnode.elm;
+            if (patchable) {
+              for (
+                let i = 0;
+                i < moduleCbs[VNodeHookNames.create].length;
+                ++i
+              ) {
+                moduleCbs[VNodeHookNames.create][i](emptyNode, ancestor);
+              }
+
+              // e.g. for directives that uses the "inserted" hook.
+              const insert = ancestor.data.hook.insert;
+              insert();
+            }
+            ancestor = ancestor.parent;
+          }
+        }
 
         // destroy old node
         if (isDef(parentElm)) {
           removeVnodes([preVnode], 0, 0);
         } else if (isDef(preVnode.tag)) {
-          // invokeDestroyHook(oldVnode);
+          invokeDestroyHook(oldVnode as VNode);
         }
       }
     }
 
-    // invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
+    invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch);
     return vnode.elm;
   };
+
+  function invokeCreateHooks(vnode: VNode, insertedVnodeQueue: Array<VNode>) {
+    for (let i = 0; i < moduleCbs[VNodeHookNames.create].length; ++i) {
+      moduleCbs[VNodeHookNames.create][i](emptyNode, vnode);
+    }
+    const vnodeHook = vnode.data.hook;
+    if (isDef(vnodeHook)) {
+      if (isDef(vnodeHook.create)) vnodeHook.create(emptyNode, vnode);
+      if (isDef(vnodeHook.insert)) insertedVnodeQueue.push(vnode);
+    }
+  }
+
+  function invokeInsertHook(vnode: VNode, queue: VNode[], initial: boolean) {
+    // delay insert hooks for component root nodes, invoke them after the
+    // element is really inserted
+    if (initial && isDef(vnode.parent)) {
+      vnode.parent.data.pendingInsert = queue;
+    } else {
+      for (let i = 0; i < queue.length; ++i) {
+        queue[i].data.hook.insert(queue[i]);
+      }
+    }
+  }
+
+  function invokeDestroyHook(vnode: VNode) {
+    let i, j;
+    const data = vnode.data;
+    if (isDef(data)) {
+      if (isDef((i = data.hook)) && isDef((i = i.destroy))) i(vnode);
+      for (i = 0; i < moduleCbs[VNodeHookNames.destroy].length; ++i)
+        moduleCbs[VNodeHookNames.destroy][i](vnode);
+    }
+    if (isDef((i = vnode.children))) {
+      for (j = 0; j < vnode.children.length; ++j) {
+        invokeDestroyHook(vnode.children[j]);
+      }
+    }
+  }
 }

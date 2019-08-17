@@ -1,6 +1,12 @@
-import Vue, {Component} from ".";
+import Vue, {Component, propsOptions} from ".";
 import {noop, isPlainObject} from "src/shared/util";
-import {observe, defineReactivity, set, del} from "../reactivity/Observer";
+import {
+  observe,
+  defineReactivity,
+  set,
+  del,
+  toggleObserving
+} from "../reactivity/Observer";
 import {pushTarget, popTarget, Dep} from "../reactivity/Dep";
 import {warn} from "src/shared/debug";
 import {Watcher, IWatcherOptions, WatcherCallback} from "../reactivity/Watcher";
@@ -49,8 +55,7 @@ export const vueProto$watch = function(
 export function initState(vm: Component) {
   vm._watchers = [];
   const opts = vm.$options;
-  // @TODO init props, involve in fn createComponent
-  // if (opts.props) initProps(vm, opts.props);
+  if (opts.props) initProps(vm, opts.props);
   if (opts.methods) initMethods(vm, opts.methods);
   if (opts.data) {
     initData(vm);
@@ -69,26 +74,28 @@ export function stateMixin(Ctor: typeof Vue) {
   Ctor.prototype.$watch = vueProto$watch;
 }
 
-function initProps(vm: Component, propsOptions: Object) {
+function initProps(vm: Component, propsOpt: propsOptions) {
   const propsData = vm.$options.propsData || {};
   const props = (vm._props = {});
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = (vm.$options._propKeys = []);
-
-  for (const key in propsOptions) {
+  if (!vm.$parent) {
+    // isRoot instance
+    // @TODO why
+    toggleObserving(false);
+  }
+  for (const key in propsOpt) {
     keys.push(key);
-    const value = undefined;
+    const value = propsData[key];
 
     defineReactivity(props, key, value);
 
-    // static props are already proxied on the component's prototype
-    // during Vue.extend(). We only need to proxy props defined at
-    // instantiation here.
     if (!(key in vm)) {
       proxy(vm, `_props`, key);
     }
   }
+  toggleObserving(true);
 }
 
 function initData(vm: Component) {

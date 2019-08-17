@@ -5,7 +5,7 @@ import Vue from "src";
 describe("Observer", () => {
   it("create on non-observables", () => {
     // skip primitive value
-    const ob1 = observe(1);
+    const ob1 = observe(1 as any);
     expect(ob1).toBeUndefined();
     // avoid vue instance
     const ob2 = observe(new Vue());

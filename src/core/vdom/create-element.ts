@@ -1,8 +1,9 @@
 import {VNode, createEmptyVNode, createTextVNode} from "./VNode";
 import {IVNodeData} from "./definition";
 import {isDef, isObject} from "src/shared/util";
-import Vue, {Component} from "../instance";
-import {traverse} from "../reactivity/traverse";
+import Vue, {Component, ICtorUserOpt} from "../instance";
+import {warn} from "src/shared/debug";
+import {createComponent} from "./create-component";
 
 export function createElement(
   context: Component,
@@ -15,16 +16,20 @@ export function createElement(
     return createEmptyVNode();
   }
 
-  let vnode;
+  let vnode: VNode, Ctor: Partial<ICtorUserOpt> | typeof Vue;
   if (typeof tag === "string") {
-    vnode = new VNode(
-      tag,
-      data,
-      normalizeChildren(children),
-      undefined,
-      undefined,
-      context
-    );
+    if ((Ctor = context.$options.components[tag])) {
+      vnode = createComponent(Ctor, context, tag, data, children);
+    } else {
+      vnode = new VNode(
+        tag,
+        data,
+        normalizeChildren(children),
+        undefined,
+        undefined,
+        context
+      );
+    }
 
     if (isDef(vnode)) {
       // if (isDef(data)) registerDeepBindings(data);
@@ -33,6 +38,7 @@ export function createElement(
       return createEmptyVNode();
     }
   }
+  warn(`createElement: Parameter tag should be type of string, but got ${tag}`);
 }
 // @TODO can be remove???
 // ref #5318

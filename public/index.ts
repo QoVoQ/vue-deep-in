@@ -8,6 +8,16 @@ function clickHandler(e) {
 }
 const vm = new Vue({
   el: "#app",
+  components: {
+    MyLabel: {
+      props: {
+        age: {type: [Number]}
+      },
+      render(h) {
+        return h("div", {}, ["Hello from child component.", this.age]);
+      }
+    }
+  },
   render(h) {
     return h(
       "div",
@@ -20,7 +30,7 @@ const vm = new Vue({
           click: [clickHandler]
         }
       },
-      [this.b]
+      [this.b, h("MyLabel", {props: {age: this.width}})]
     );
   },
   data: {b: {c: 1}, width: 100},
