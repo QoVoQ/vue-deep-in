@@ -87,42 +87,50 @@ describe("Scheduler", () => {
     }).then(done);
   });
 
-  // it("call user watcher triggered by component re-render immediately", done => {
-  //   // this happens when a component re-render updates the props of a child
-  //   const calls = [];
-  //   const vm = new Vue({
-  //     data: {
-  //       a: 1
-  //     },
-  //     watch: {
-  //       a() {
-  //         calls.push(1);
-  //       }
-  //     },
-  //     beforeUpdate() {
-  //       calls.push(2);
-  //     },
-  //     template: '<div><test :a="a"></test></div>',
-  //     components: {
-  //       test: {
-  //         props: ["a"],
-  //         template: "<div>{{ a }}</div>",
-  //         watch: {
-  //           a() {
-  //             calls.push(3);
-  //           }
-  //         },
-  //         beforeUpdate() {
-  //           calls.push(4);
-  //         }
-  //       }
-  //     }
-  //   }).$mount();
-  //   vm.a = 2;
-  //   waitForUpdate(() => {
-  //     expect(calls).toEqual([1, 2, 3, 4]);
-  //   }).then(done);
-  // });
+  it("call user watcher triggered by component re-render immediately", done => {
+    // this happens when a component re-render updates the props of a child
+    const calls = [];
+    const vm = new Vue({
+      data: {
+        a: 1
+      },
+      watch: {
+        a() {
+          calls.push(1);
+        }
+      },
+      beforeUpdate() {
+        calls.push(2);
+      },
+      render(h) {
+        return h("div", {}, [h("test", {props: {a: this.a}})]);
+      },
+      components: {
+        test: {
+          props: {
+            a: {
+              type: [Number]
+            }
+          },
+          render(h) {
+            return h("div", {}, this.a);
+          },
+          watch: {
+            a() {
+              calls.push(3);
+            }
+          },
+          beforeUpdate() {
+            calls.push(4);
+          }
+        }
+      }
+    }).$mount();
+    (vm as any).a = 2;
+    waitForUpdate(() => {
+      expect(calls).toEqual([1, 2, 3, 4]);
+    }).then(done);
+  });
 
   it("should call newly pushed watcher after current watcher is done", done => {
     const callOrder = [];
@@ -148,33 +156,50 @@ describe("Scheduler", () => {
   });
 
   // GitHub issue #5191
-  // it("emit should work when updated hook called", done => {
-  //   const el = document.createElement("div");
-  //   const vm = new Vue({
-  //     template: `<div><child @change="bar" :foo="foo"></child></div>`,
-  //     data: {
-  //       foo: 0
-  //     },
-  //     methods: {
-  //       bar: spy
-  //     },
-  //     components: {
-  //       child: {
-  //         template: `<div>{{foo}}</div>`,
-  //         props: ["foo"],
-  //         updated() {
-  //           this.$emit("change");
-  //         }
-  //       }
-  //     }
-  //   }).$mount(el);
-  //   vm.$nextTick(() => {
-  //     vm.foo = 1;
-  //     vm.$nextTick(() => {
-  //       expect(vm.$el.innerHTML).toBe("<div>1</div>");
-  //       expect(spy).toHaveBeenCalled();
-  //       done();
-  //     });
-  //   });
-  // });
+  it("emit should work when updated hook called", done => {
+    const el = document.createElement("div");
+    const vm = new Vue({
+      render(h) {
+        return h("div", {}, [
+          h("child", {
+            on: {
+              change: [this.bar]
+            },
+            props: {
+              foo: this.foo
+            }
+          })
+        ]);
+      },
+      data: {
+        foo: 0
+      },
+      methods: {
+        bar: spy
+      },
+      components: {
+        child: {
+          render(h) {
+            return h("div", {}, [this.foo]);
+          },
+          props: {
+            foo: {
+              type: [Number]
+            }
+          },
+          updated() {
+            this.$emit("change");
+          }
+        }
+      }
+    }).$mount(el);
+    vm.$nextTick(() => {
+      (vm as any).foo = 1;
+      vm.$nextTick(() => {
+        expect(vm.$el.innerHTML).toBe("<div>1</div>");
+        expect(spy).toHaveBeenCalled();
+        done();
+      });
+    });
+  });
 });

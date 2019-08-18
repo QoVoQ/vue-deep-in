@@ -17,25 +17,26 @@ describe("create-element", () => {
     expect(vnode.context).toEqual(vm);
   });
 
-  // it('render vnode with component using createElement', () => {
-  //   const vm = new Vue({
-  //     data: { message: 'hello world' },
-  //     components: {
-  //       'my-component': {
-  //         props: ['msg']
-  //       }
-  //     }
-  //   })
-  //   const h = vm.$createElement
-  //   const vnode = h('my-component', { props: { msg: vm.message } })
-  //   expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
-  //   expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
-  //   expect(vnode.children).toBeUndefined()
-  //   expect(vnode.text).toBeUndefined()
-  //   expect(vnode.elm).toBeUndefined()
-  //   expect(vnode.ns).toBeUndefined()
-  //   expect(vnode.context).toEqual(vm)
-  // })
+  it("render vnode with component using createElement", () => {
+    const vm: any = new Vue({
+      data: {message: "hello world"},
+      components: {
+        "my-component": {
+          props: {
+            msg: {type: [String]}
+          }
+        }
+      }
+    });
+    const h = vm.$createElement;
+    const vnode = h("my-component", {props: {msg: vm.message}});
+    expect(vnode.tag).toMatch(/vue-component-[0-9]+/);
+    expect(vnode.componentOptions.propsData).toEqual({msg: vm.message});
+    expect(vnode.children).toBeUndefined();
+    expect(vnode.text).toBeUndefined();
+    expect(vnode.elm).toBeUndefined();
+    expect(vnode.context).toEqual(vm);
+  });
 
   it("render vnode with custom tag using createElement", () => {
     const vm = new Vue({
@@ -62,22 +63,29 @@ describe("create-element", () => {
     expect(vnode).toEqual(createEmptyVNode());
   });
 
-  // it('render vnode with not string tag using createElement', () => {
-  //   const vm = new Vue({
-  //     data: { msg: 'hello world' }
-  //   })
-  //   const h = vm.$createElement
-  //   const vnode = h(Vue.extend({ // Component class
-  //     props: ['msg']
-  //   }), { props: { msg: vm.message } })
-  //   expect(vnode.tag).toMatch(/vue-component-[0-9]+/)
-  //   expect(vnode.componentOptions.propsData).toEqual({ msg: vm.message })
-  //   expect(vnode.children).toBeUndefined()
-  //   expect(vnode.text).toBeUndefined()
-  //   expect(vnode.elm).toBeUndefined()
-  //   expect(vnode.ns).toBeUndefined()
-  //   expect(vnode.context).toEqual(vm)
-  // })
+  it("render vnode with not string tag using createElement", () => {
+    const vm: any = new Vue({
+      data: {msg: "hello world"}
+    });
+    const h = vm.$createElement;
+    const vnode = h(
+      Vue.extend({
+        // Component class
+        props: {
+          msg: {
+            type: [String]
+          }
+        }
+      }),
+      {props: {msg: vm.message}}
+    );
+    expect(vnode.tag).toMatch(/vue-component-[0-9]+/);
+    expect(vnode.componentOptions.propsData).toEqual({msg: vm.message});
+    expect(vnode.children).toBeUndefined();
+    expect(vnode.text).toBeUndefined();
+    expect(vnode.elm).toBeUndefined();
+    expect(vnode.context).toEqual(vm);
+  });
 
   it("render vnode with createElement with children", () => {
     const vm = new Vue({});
@@ -130,22 +138,26 @@ describe("create-element", () => {
   });
 
   // #7786
-  // it('creates element with vnode reference in :class or :style', () => {
-  //   const vm = new Vue({
-  //     components: {
-  //       foo: {
-  //         render(h) {
-  //           return h('div', {
-  //             class: {
-  //               'has-vnode': this.$vnode
-  //             }
-  //           }, 'foo')
-  //         }
-  //       }
-  //     },
-  //     render: h => h('foo')
-  //   }).$mount()
-  //   expect(vm.$el.innerHTML).toContain('foo')
-  //   expect(vm.$el.classList.contains('has-vnode')).toBe(true)
-  // })
+  it("creates element with vnode reference in :class or :style", () => {
+    const vm = new Vue({
+      components: {
+        foo: {
+          render(h) {
+            return h(
+              "div",
+              {
+                class: {
+                  "has-vnode": this.$vnode
+                }
+              },
+              "foo"
+            );
+          }
+        }
+      },
+      render: h => h("foo")
+    }).$mount();
+    expect(vm.$el.innerHTML).toContain("foo");
+    expect(vm.$el.classList.contains("has-vnode")).toBe(true);
+  });
 });

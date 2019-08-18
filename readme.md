@@ -16,6 +16,7 @@
 - [ ] VDom
   - [ ] Patch(Update DOM according to old vnodes and new vnodes)
     - [x] Diff vnode
+    - [ ] Scoped ID (css)
     - [x] Update properties of new vnode's corresponding HTMLElement
       - [x] class
       - [x] style

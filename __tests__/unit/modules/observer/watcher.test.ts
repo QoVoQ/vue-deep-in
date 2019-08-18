@@ -190,13 +190,13 @@ describe("Watcher", () => {
     }).then(done);
   });
 
-  // it("teardown", done => {
-  //   const watcher = new Watcher(vm, "b.c", spy);
-  //   watcher.teardown();
-  //   vm.b.c = 3;
-  //   waitForUpdate(() => {
-  //     expect(watcher.active).toBe(false);
-  //     expect(spy).not.toHaveBeenCalled();
-  //   }).then(done);
-  // });
+  it("teardown", done => {
+    const watcher = new Watcher(vm, "b.c", spy);
+    watcher.teardown();
+    vm.b.c = 3;
+    waitForUpdate(() => {
+      expect(watcher.active).toBe(false);
+      expect(spy).not.toHaveBeenCalled();
+    }).then(done);
+  });
 });

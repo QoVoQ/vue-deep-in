@@ -83,6 +83,7 @@ function initProps(vm: Component, propsOpt: propsOptions) {
   if (!vm.$parent) {
     // isRoot instance
     // @TODO why
+    // seems every time when updating props, it calls
     toggleObserving(false);
   }
   for (const key in propsOpt) {

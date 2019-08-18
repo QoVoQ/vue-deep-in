@@ -1,5 +1,6 @@
 import Component from "packages/vue-class-component/src";
 import Vue from "src";
+import {waitForUpdate} from "src/shared/util";
 
 describe("Options lifecycle hooks", () => {
   let spy;
@@ -100,33 +101,41 @@ describe("Options lifecycle hooks", () => {
       }).$mount();
       expect(spy).toHaveBeenCalled();
     });
-    // it("should mount child parent in correct order", () => {
-    //   const calls = [];
-    //   new Vue({
-    //     template: "<div><test></test></div>",
-    //     mounted() {
-    //       calls.push("parent");
-    //     },P
-    //     components: {
-    //       test: {
-    //         template: "<nested></nested>",
-    //         mounted() {
-    //           expect(this.$el.parentNode).toBeTruthy();
-    //           calls.push("child");
-    //         },
-    //         components: {
-    //           nested: {
-    //             template: "<div></div>",
-    //             mounted() {
-    //               expect(this.$el.parentNode).toBeTruthy();
-    //               calls.push("nested");
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }).$mount();
-    //   expect(calls).toEqual(["nested", "child", "parent"]);
+
+    it("should mount child parent in correct order", () => {
+      const calls = [];
+      new Vue({
+        render(h) {
+          return h("div", {}, [h("test")]);
+        },
+        mounted() {
+          calls.push("parent");
+        },
+        components: {
+          test: {
+            render(h) {
+              return h("nested");
+            },
+            mounted() {
+              expect(this.$el.parentNode).toBeTruthy();
+              calls.push("child");
+            },
+            components: {
+              nested: {
+                render(h) {
+                  return h("div");
+                },
+                mounted() {
+                  expect(this.$el.parentNode).toBeTruthy();
+                  calls.push("nested");
+                }
+              }
+            }
+          }
+        }
+      }).$mount();
+      expect(calls).toEqual(["nested", "child", "parent"]);
+    });
   });
 
   describe("beforeUpdate", () => {
@@ -171,41 +180,56 @@ describe("Options lifecycle hooks", () => {
     });
 
     // #8076
-    // it("should not be called after destroy", done => {
-    //   const beforeUpdate = jasmine.createSpy("beforeUpdate");
-    //   const destroyed = jasmine.createSpy("destroyed");
+    it("should not be called after destroy", done => {
+      const beforeUpdate = jest.fn();
+      const destroyed = jest.fn();
 
-    //   Vue.component("todo", {
-    //     template: "<div>{{todo.done}}</div>",
-    //     props: ["todo"],
-    //     destroyed,
-    //     beforeUpdate
-    //   });
+      const todo = Vue.extend({
+        render(h) {
+          return h("div", {}, [this.todo.done]);
+        },
+        props: {
+          todo: {
+            type: [Object]
+          }
+        },
+        destroyed,
+        beforeUpdate
+      });
 
-    //   const vm = new Vue({
-    //     template: `
-    //       <div>
-    //         <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
-    //       </div>
-    //     `,
-    //     data() {
-    //       return {
-    //         todos: [{id: 1, done: false}]
-    //       };
-    //     },
-    //     computed: {
-    //       pendingTodos() {
-    //         return this.todos.filter(t => !t.done);
-    //       }
-    //     }
-    //   }).$mount();
+      const vm = new Vue({
+        render(h) {
+          return h(
+            "div",
+            {},
+            this.pendingTodos.map(d =>
+              h(todo, {
+                key: d.id,
+                props: {
+                  todo: d
+                }
+              })
+            )
+          );
+        },
+        data() {
+          return {
+            todos: [{id: 1, done: false}]
+          };
+        },
+        computed: {
+          pendingTodos() {
+            return this.todos.filter(t => !t.done);
+          }
+        }
+      }).$mount();
 
-    //   vm.todos[0].done = true;
-    //   waitForUpdate(() => {
-    //     expect(destroyed).toHaveBeenCalled();
-    //     expect(beforeUpdate).not.toHaveBeenCalled();
-    //   }).then(done);
-    // });
+      (vm as any).todos[0].done = true;
+      waitForUpdate(() => {
+        expect(destroyed).toHaveBeenCalled();
+        expect(beforeUpdate).not.toHaveBeenCalled();
+      }).then(done);
+    });
   });
 
   describe("updated", () => {
@@ -259,41 +283,56 @@ describe("Options lifecycle hooks", () => {
     // });
 
     // #8076
-    // it("should not be called after destroy", done => {
-    //   const updated = jasmine.createSpy("updated");
-    //   const destroyed = jasmine.createSpy("destroyed");
+    it("should not be called after destroy", done => {
+      const updated = jest.fn();
+      const destroyed = jest.fn();
 
-    //   Vue.component("todo", {
-    //     template: "<div>{{todo.done}}</div>",
-    //     props: ["todo"],
-    //     destroyed,
-    //     updated
-    //   });
+      const todo = Vue.extend({
+        render(h) {
+          return h("div", {}, [this.todo.done]);
+        },
+        props: {
+          todo: {
+            type: [Object]
+          }
+        },
+        destroyed,
+        updated
+      });
 
-    //   const vm = new Vue({
-    //     template: `
-    //       <div>
-    //         <todo v-for="t in pendingTodos" :todo="t" :key="t.id"></todo>
-    //       </div>
-    //     `,
-    //     data() {
-    //       return {
-    //         todos: [{ id: 1, done: false }]
-    //       };
-    //     },
-    //     computed: {
-    //       pendingTodos() {
-    //         return this.todos.filter(t => !t.done);
-    //       }
-    //     }
-    //   }).$mount();
+      const vm = new Vue({
+        render(h) {
+          return h(
+            "div",
+            {},
+            this.pendingTodos.map(d =>
+              h(todo, {
+                key: d.id,
+                props: {
+                  todo: d
+                }
+              })
+            )
+          );
+        },
+        data() {
+          return {
+            todos: [{id: 1, done: false}]
+          };
+        },
+        computed: {
+          pendingTodos() {
+            return this.todos.filter(t => !t.done);
+          }
+        }
+      }).$mount();
 
-    //   vm.todos[0].done = true;
-    //   waitForUpdate(() => {
-    //     expect(destroyed).toHaveBeenCalled();
-    //     expect(updated).not.toHaveBeenCalled();
-    //   }).then(done);
-    // });
+      (vm as any).todos[0].done = true;
+      waitForUpdate(() => {
+        expect(destroyed).toHaveBeenCalled();
+        expect(updated).not.toHaveBeenCalled();
+      }).then(done);
+    });
   });
 
   describe("beforeDestroy", () => {

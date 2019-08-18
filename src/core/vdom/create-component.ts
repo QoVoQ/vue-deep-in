@@ -85,7 +85,7 @@ export function createComponent(
   data.on = data.nativeOn;
 
   const ctorName = Ctor.options.name;
-  const tagName = `vue-component-${Ctor.cid}${ctorName || ""}`;
+  const tagName = `vue-component-${Ctor.cid}${ctorName ? "-" + ctorName : ""}`;
   return new VNode(tagName, data, undefined, undefined, undefined, context, {
     Ctor,
     children,
