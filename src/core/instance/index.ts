@@ -23,7 +23,8 @@ interface ICtorUserOpt {
 
   render?: renderFunction;
 
-  mixins?: Partial<ICtorOptions>[];
+  mixins?: Array<Partial<ICtorOptions> | typeof Vue>;
+  extends?: Partial<ICtorOptions> | typeof Vue;
 
   [ComponentLifecycleName.beforeCreate]?: Function | Function[];
   [ComponentLifecycleName.created]?: Function | Function[];
@@ -81,9 +82,11 @@ import {Watcher, set, del} from "../reactivity";
 import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
 import {ctorExtend} from "../global-api/extend";
+import {ctorMixin} from "../global-api/mixin";
 
 class Vue {
   static extend = ctorExtend;
+  static mixin = ctorMixin;
   static cid = 0;
   static _base: typeof Vue;
   static options: Partial<ICtorUserOpt> & {_base?: typeof Vue};
@@ -113,6 +116,7 @@ class Vue {
 
   _watchers?: Array<Watcher>;
 
+  // parent.data.attrs
   $attrs?: object;
 
   $listeners?: object;

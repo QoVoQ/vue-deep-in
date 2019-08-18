@@ -150,13 +150,19 @@ mergeStrategy.props = mergeStrategy.methods = mergeStrategy.computed = function(
 
 export function mergeOptions(
   optParent: Partial<ICtorUserOpt>,
-  optChild: Partial<ICtorUserOpt> & {_base?: typeof Vue},
+  optChild: Partial<ICtorUserOpt> & {_base?: typeof Vue} | typeof Vue,
   vm?: Component
 ) {
+  if (typeof optChild === "function") {
+    optChild = (optChild as typeof Vue).options;
+  }
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   if (!optChild._base) {
+    if (optChild.extends) {
+      optParent = mergeOptions(optParent, optChild.extends, vm);
+    }
     if (optChild.mixins) {
       optChild.mixins.forEach(mix => {
         optParent = mergeOptions(optParent, mix, vm);

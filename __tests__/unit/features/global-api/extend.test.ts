@@ -33,8 +33,26 @@ describe("Global API extends", () => {
     expect(t2.$options.b).toBe(2);
   });
 
-  it("should warn invalid names", () => {});
-  it("should work when used as components", () => {});
+  it("should work when used as components", () => {
+    const foo = Vue.extend({
+      render(h) {
+        return h("span", {}, "foo");
+      }
+    });
+    const bar = Vue.extend({
+      render(h) {
+        return h("span", {}, "bar");
+      }
+    });
+    const vm = new Vue({
+      render(h) {
+        return h("div", {}, [h("foo"), h("bar")]);
+      },
+      components: {foo, bar}
+    }).$mount();
+    expect(vm.$el.innerHTML).toBe("<span>foo</span><span>bar</span>");
+  });
+
   it("should merge lifecycle hooks", () => {
     const calls = [];
     const A = Vue.extend({
@@ -53,6 +71,25 @@ describe("Global API extends", () => {
       }
     });
     expect(calls).toEqual([1, 2, 3]);
+  });
+
+  it("should not merge nested mixins created with Vue.extend", () => {
+    const A = Vue.extend({
+      created: () => {}
+    });
+    const B = Vue.extend({
+      mixins: [A],
+      created: () => {}
+    });
+    const C = Vue.extend({
+      extends: B,
+      created: () => {}
+    });
+    const D = Vue.extend({
+      mixins: [C],
+      created: () => {}
+    });
+    expect(D.options.created.length).toBe(4);
   });
 
   it("should merge methods", () => {
@@ -86,7 +123,47 @@ describe("Global API extends", () => {
     expect(b.b()).toBe(1);
     expect(b.c()).toBe(2);
   });
-  it("should merge assets", () => {});
+  it("should merge assets", () => {
+    const A = Vue.extend({
+      components: {
+        aa: {
+          render(h) {
+            return h("div", {}, "A");
+          }
+        }
+      }
+    });
+
+    const B = A.extend({
+      components: {
+        bb: {
+          render(h) {
+            return h("div", {}, "B");
+          }
+        }
+      }
+    });
+
+    const b = new B({
+      render(h) {
+        return h("div", {}, [h("aa"), h("bb")]);
+      }
+    }).$mount();
+
+    expect(b.$el.innerHTML).toBe("<div>A</div><div>B</div>");
+  });
+
+  it("caching", () => {
+    const options = {
+      render(h) {
+        return h("div", {});
+      }
+    };
+    const A = Vue.extend(options);
+    const B = Vue.extend(options);
+    expect(A).toBe(B);
+  });
+
   it("extended options should use different identify from parent", () => {
     const A = Vue.extend({computed: {}});
     const B = A.extend({});

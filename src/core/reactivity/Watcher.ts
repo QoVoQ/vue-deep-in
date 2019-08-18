@@ -28,7 +28,7 @@ class Watcher {
   depIds: Set<number>;
   newDeps: Array<Dep>;
   newDepIds: Set<number>;
-
+  active: boolean;
   dirty?: boolean;
   user?: boolean;
   deep?: boolean;
@@ -44,6 +44,7 @@ class Watcher {
   ) {
     this.uid = uid++;
     this.target = target;
+    this.active = true;
     if (isRenderWatcher) {
       target._watcher = this;
     }
@@ -82,6 +83,9 @@ class Watcher {
   }
 
   run() {
+    if (!this.active) {
+      return;
+    }
     const newValue = this.get();
     // Deep watchers and watchers on Object/Arrays should fire even
     // when the value is the same, because the value may
@@ -154,6 +158,9 @@ class Watcher {
   }
 
   teardown() {
+    if (!this.active) {
+      return;
+    }
     if (!this.target._isBeingDestroyed) {
       remove(this.target._watchers, this);
       this.target._watcher = null;
@@ -162,6 +169,7 @@ class Watcher {
       dep.removeSubscriber(this);
     });
     this.depIds = null;
+    this.active = false;
   }
 
   evaluate() {

@@ -7,7 +7,7 @@ import {createComponent} from "./create-component";
 
 export function createElement(
   context: Component,
-  tag?: string | typeof Vue,
+  tag: string | typeof Vue,
   data?: IVNodeData,
   children?: Array<any> | any
 ): VNode {
@@ -30,15 +30,19 @@ export function createElement(
         context
       );
     }
-
-    if (isDef(vnode)) {
-      // if (isDef(data)) registerDeepBindings(data);
-      return vnode;
-    } else {
-      return createEmptyVNode();
-    }
+  } else if ((tag as typeof Vue).options) {
+    vnode = createComponent(tag, context, tag.options.name, data, children);
+  } else {
+    warn(
+      `createElement: Parameter tag should be type of string or component constructor, but got ${tag}`
+    );
   }
-  warn(`createElement: Parameter tag should be type of string, but got ${tag}`);
+  if (isDef(vnode)) {
+    // if (isDef(data)) registerDeepBindings(data);
+    return vnode;
+  } else {
+    return createEmptyVNode();
+  }
 }
 // @TODO can be remove???
 // ref #5318

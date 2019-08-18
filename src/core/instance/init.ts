@@ -44,6 +44,9 @@ export function initMixin(Ctor: typeof Vue) {
 }
 
 function resolveCtorOptions(Ctor: typeof Vue): Partial<ICtorUserOpt> {
+  // @TODO update super and sub options
+  // because super's option may change during runtime, especially when `Vue.mixin`
+  // is called
   return Ctor.options || {};
 }
 
