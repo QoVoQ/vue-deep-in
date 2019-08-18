@@ -1,5 +1,5 @@
 import {VNode} from "./VNode";
-import {isDef, makeMap, isPrimitive} from "src/shared/util";
+import {isDef, isPrimitive} from "src/shared/util";
 import {NodeOps} from "src/web/runtime/NodeOps";
 import {VNodeModule, VNodeHookNames} from "src/web/runtime/modules/definition";
 
@@ -493,8 +493,8 @@ export function createPatchFunction(backend: {
               }
 
               // e.g. for directives that uses the "inserted" hook.
-              const insert = ancestor.data.hook.insert;
-              insert();
+              const insertHook = ancestor.data.hook.insert;
+              insertHook && insertHook(ancestor);
             }
             ancestor = ancestor.parent;
           }

@@ -9,9 +9,9 @@ describe("Options render", () => {
       render(h) {
         const children = [];
         this.items.map(item => {
-          h("li", {staticClass: "task"}, [item.name]);
+          h("li", {class: "task"}, [item.name]);
         });
-        return h("ul", {staticClass: "tasks"}, children);
+        return h("ul", {class: "tasks"}, children);
       }
     }).$mount();
 

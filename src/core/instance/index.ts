@@ -1,12 +1,7 @@
 import {VNode} from "../vdom/VNode";
 import {VNodeOn} from "../vdom/definition";
 
-type createElementFunction = (
-  tag: string,
-  data?: object,
-  children?: Array<any> | any
-) => VNode;
-type renderFunction = (c: createElementFunction) => VNode;
+type renderFunction = (c: I$createElement) => VNode | VNode[];
 
 type propsOptions = {[key: string]: {type: Function[]}};
 
@@ -44,7 +39,7 @@ interface IInternalComponentOptions {
   _isComponent: true;
   parent: Component;
   // root vnode of a component, like <son/>,
-  // vm.$options._parentVNode, vm.$vnode, childVNode.parent
+  // vm.$options._parentVnode, vm.$vnode, childVNode.parent
   // it has attributes 'componentInstance' and 'componentOptions'
   _parentVnode: VNode;
 
@@ -62,7 +57,12 @@ type Component = Vue;
 
 import {vueProto_init, initMixin} from "./init";
 import {vueProto$watch, stateMixin} from "./state";
-import {vueProto_render, vueProto$nextTick, renderMixin} from "./render";
+import {
+  vueProto_render,
+  vueProto$nextTick,
+  renderMixin,
+  I$createElement
+} from "./render";
 import {
   vueProto$on,
   vueProto$emit,
@@ -119,7 +119,7 @@ class Vue {
 
   $children?: Array<Component>;
 
-  $createElement?: createElementFunction;
+  $createElement?: I$createElement;
 
   get $data(): any {
     return this._data;

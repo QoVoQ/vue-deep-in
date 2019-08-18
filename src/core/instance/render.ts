@@ -11,12 +11,12 @@ export function vueProto$nextTick(fn?: Function) {
 
 export function vueProto_render(): VNode {
   const vm: Component = this;
-  const {render, _parentVNode} = vm.$options;
+  const {render, _parentVnode} = vm.$options;
 
   // set parent vnode. this allows render functions to have access
   // to the data on the placeholder node.
   // like vnode tag <component-son-1 />
-  vm.$vnode = _parentVNode;
+  vm.$vnode = _parentVnode;
   // render self
   let vnode;
   try {
@@ -39,14 +39,12 @@ export function vueProto_render(): VNode {
     vnode = createEmptyVNode();
   }
   // set parent
-  vnode.parent = _parentVNode;
+  vnode.parent = _parentVnode;
   return vnode;
 }
 
 export interface I$createElement {
-  (tag?: string | typeof Vue, data?: IVNodeData, children?: any[]):
-    | VNode
-    | VNode[];
+  (tag?: string | typeof Vue, data?: IVNodeData, children?: any): VNode;
 }
 
 export function renderMixin(Ctor: typeof Vue) {
@@ -57,11 +55,12 @@ export function renderMixin(Ctor: typeof Vue) {
 export function initRender(vm: Component) {
   vm._vnode = null; // the root of the child tree
   const options = vm.$options;
-  const parentVnode = (vm.$vnode = options._parentVNode); // the placeholder node in parent tree
+  const parentVnode = (vm.$vnode = options._parentVnode); // the placeholder node in parent tree
   // @TODO fn _c deletable??
   vm._c = (a, b, c) => createElement(vm, a, b, c);
 
-  vm.$createElement = (a, b, c?) => createElement(vm, a, b, c);
+  const renderFn: I$createElement = (a, b, c?) => createElement(vm, a, b, c);
+  vm.$createElement = renderFn;
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOC using them are always updated
