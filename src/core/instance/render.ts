@@ -1,9 +1,10 @@
-import Vue, {Component} from ".";
+import Vue, {Component, ICtorOptions} from ".";
 import {VNode, createEmptyVNode, IVNodeData} from "../vdom/VNode";
 import {warn} from "src/shared/debug";
 import {createElement} from "../vdom/create-element";
 import {defineReactivity} from "../reactivity";
 import {nextTick} from "../util/next-tick";
+import {resolveSlot} from "./render-helpers/resolve-slot";
 
 export function vueProto$nextTick(fn?: Function) {
   return nextTick(fn, this);
@@ -11,12 +12,16 @@ export function vueProto$nextTick(fn?: Function) {
 
 export function vueProto_render(): VNode {
   const vm: Component = this;
-  const {render, _parentVnode} = vm.$options;
+  const {render, _parentVnode, _renderChildren} = vm.$options;
 
   // set parent vnode. this allows render functions to have access
   // to the data on the placeholder node.
   // like vnode tag <component-son-1 />
   vm.$vnode = _parentVnode;
+  this.$slots = resolveSlot(
+    _renderChildren,
+    _parentVnode && _parentVnode.context
+  );
   // render self
   let vnode;
   try {
@@ -56,8 +61,6 @@ export function initRender(vm: Component) {
   vm._vnode = null; // the root of the child tree
   const options = vm.$options;
   const parentVnode = (vm.$vnode = options._parentVnode); // the placeholder node in parent tree
-  // @TODO fn _c deletable??
-  vm._c = (a, b, c) => createElement(vm, a, b, c);
 
   const renderFn: I$createElement = (a, b, c?) => createElement(vm, a, b, c);
   vm.$createElement = renderFn;

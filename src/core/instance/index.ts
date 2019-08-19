@@ -1,4 +1,4 @@
-import {VNode} from "../vdom/VNode";
+import {VNode, createTextVNode} from "../vdom/VNode";
 import {VNodeOn} from "../vdom/definition";
 
 type renderFunction = (c: I$createElement) => VNode | VNode[];
@@ -54,6 +54,11 @@ interface ICtorOptions extends ICtorUserOpt, IInternalComponentOptions {
   _parentListeners?: VNodeOn;
   _renderChildren?: VNode[];
 }
+
+interface IRenderHelpers {
+  _t: typeof renderSlot;
+  _v: typeof createTextVNode;
+}
 type Component = Vue;
 
 import {vueProto_init, initMixin} from "./init";
@@ -83,8 +88,11 @@ import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
 import {ctorExtend} from "../global-api/extend";
 import {ctorMixin} from "../global-api/mixin";
+import {SlotsMap} from "./render-helpers/resolve-slot";
+import {renderSlot} from "./render-helpers/render-slot";
+import {installRenderHelperFn} from "./render-helpers";
 
-class Vue {
+class Vue implements IRenderHelpers {
   static extend = ctorExtend;
   static mixin = ctorMixin;
   static cid = 0;
@@ -142,13 +150,15 @@ class Vue {
     warn("$props is readonly");
   }
   $el?: Element;
-  $options?: Partial<ICtorUserOpt> & {_base?: typeof Vue};
+  $options?: Partial<ICtorOptions> & {_base?: typeof Vue};
 
   $parent?: Component;
 
   $root?: Component;
 
   $vnode?: VNode;
+
+  $slots?: SlotsMap;
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 
@@ -179,7 +189,12 @@ class Vue {
 
   $set: typeof set;
   $delete: typeof del;
+
+  _t: typeof renderSlot;
+
+  _v: typeof createTextVNode;
 }
+installRenderHelperFn(Vue);
 initMixin(Vue);
 eventsMixin(Vue);
 lifecycleMixin(Vue);

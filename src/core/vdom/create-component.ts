@@ -30,7 +30,6 @@ const componentVNodeHooks = {
       options.children // new children
     );
   },
-
   insert(vnode: VNode) {
     const {componentInstance} = vnode;
     if (!componentInstance._isMounted) {

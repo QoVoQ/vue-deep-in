@@ -1,6 +1,5 @@
 import Vue from "src";
-import Component from "packages/vue-class-component/src";
-import {Watcher} from "src/core/reactivity/Watcher";
+
 const vm = new Vue({
   el: "#app",
   data: {
@@ -11,14 +10,19 @@ const vm = new Vue({
       data() {
         return {tag: "div"};
       },
-      render(h) {
-        return h(this.tag, {class: "test"}, "hi");
+      render(this: Vue, h) {
+        return h("div", {class: "test"}, [
+          h("p", {}, "this is child content"),
+          // this._t("default", [this._v("default content.....123")]),
+          this._t("hi")
+        ]);
       }
     }
   },
   render(h) {
-    return h("test", {attrs: {id: "foo"}, class: this.color}, []);
+    return h("test", {}, [
+      // h("p", {}, ["this should be slot content"])
+      h("p", {slot: "hi"}, ["Hi, guys. I am slot: hi"])
+    ]);
   }
 }).$mount();
-
-(vm.$children[0] as any).tag = "p";

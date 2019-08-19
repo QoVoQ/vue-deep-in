@@ -19,7 +19,13 @@ export function createElement(
   let vnode: VNode, Ctor: Partial<ICtorUserOpt> | typeof Vue;
   if (typeof tag === "string") {
     if ((Ctor = context.$options.components[tag])) {
-      vnode = createComponent(Ctor, context, tag, data, children);
+      vnode = createComponent(
+        Ctor,
+        context,
+        tag,
+        data,
+        normalizeChildren(children)
+      );
     } else {
       vnode = new VNode(
         tag,
@@ -31,7 +37,13 @@ export function createElement(
       );
     }
   } else if ((tag as typeof Vue).options) {
-    vnode = createComponent(tag, context, tag.options.name, data, children);
+    vnode = createComponent(
+      tag,
+      context,
+      tag.options.name,
+      data,
+      normalizeChildren(children)
+    );
   } else {
     warn(
       `createElement: Parameter tag should be type of string or component constructor, but got ${tag}`
@@ -57,11 +69,15 @@ export function createElement(
 //   }
 // }
 
-function normalizeChildren(children: any[]): VNode[] {
+export function normalizeChildren(children: any[]): VNode[] {
   return Array.isArray(children)
     ? children.reduce((acc, cur) => {
-        const vnode = cur instanceof VNode ? cur : createTextVNode(cur);
-        return acc.concat(vnode);
+        if (Array.isArray(cur)) {
+          return acc.concat(normalizeChildren(cur));
+        } else {
+          const vnode = cur instanceof VNode ? cur : createTextVNode(cur);
+          return acc.concat(vnode);
+        }
       }, [])
     : isDef(children)
     ? [createTextVNode(children)]

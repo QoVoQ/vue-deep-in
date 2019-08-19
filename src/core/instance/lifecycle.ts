@@ -7,6 +7,7 @@ import {pushTarget, popTarget, toggleObserving} from "../reactivity";
 import {updateComponentListeners} from "./events";
 import {VNodeOn} from "../vdom/definition";
 import {validateProp} from "../util/props";
+import {resolveSlot} from "./render-helpers/resolve-slot";
 
 export enum ComponentLifecycleName {
   beforeCreate = "beforeCreate",
@@ -150,6 +151,9 @@ export function updateChildComponent(
   parentVnode: VNode,
   renderChildren?: Array<VNode>
 ) {
+  const needsForceUpdate = !!(
+    renderChildren || vm.$options._renderChildren // has new slot
+  ); // has old slot
   vm.$options._parentVnode = parentVnode;
   vm.$vnode = parentVnode; // update vm's placeholder node without re-render
 
@@ -186,6 +190,11 @@ export function updateChildComponent(
   const oldListeners = vm.$options._parentListeners;
   vm.$options._parentListeners = listeners;
   updateComponentListeners(vm, listeners, oldListeners);
+  if (needsForceUpdate) {
+    vm.$slots = resolveSlot(renderChildren, parentVnode.context);
+    // @todo why? any necessity?
+    vm.$forceUpdate();
+  }
 }
 
 export function callHook(vm: Component, hookName: ComponentLifecycleName) {
