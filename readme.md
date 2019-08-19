@@ -10,6 +10,7 @@
     - [x] add/delete property
   - [x] Watcher
     - [x] Asynchronous Execution
+      Update watchers in an async queue
     - [x] Watch object deeply
     - [x] Watch object lazily
 
@@ -40,27 +41,32 @@
       Construct vnode tree according to state of Vue instance(props,state...)
     - [x] Vue.prototype.$createElement
       Constructor of vnode(used in render function)
-  - [ ] State
-    - [ ] Initialization of options `props`
+  - [x] State
+    - [x] Initialization of options `props`
     - [x] Initialization of option `methods`
     - [x] Initialization of option `data`
     - [x] Initialization of options `computed`
     - [x] Initialization of options `watch`
 
 - [ ] Component
-  - [ ] basic
-  - [ ] Keep-alive
+  - [x] basic
   - [ ] slot
   - [ ] scoped-slot
+  - [ ] Keep-alive
   - [ ] functional
   - [ ] custom directive
   - [ ] async component
+
+- [ ] Filter
+- [ ] Directive
 
 - [ ] Util
   - [x] nextTick
 
 - [ ] Global-API
   - [x] Vue.extend
+  - [x] Vue.mixin
+    Behind the scene, method `mergeOptions` play a magnificent role in Vue.extend & Vue.mixin
 
 - [ ] Compiler
 

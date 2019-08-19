@@ -10,3 +10,5 @@ afterEach(() => {
   console.log = originalLog;
   console.error = originalLog;
 });
+
+export {};
