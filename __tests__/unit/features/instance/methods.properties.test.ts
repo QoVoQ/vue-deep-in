@@ -1,6 +1,7 @@
 import Vue from "src";
 import Component from "packages/vue-class-component/src";
 import {waitForUpdate, triggerEvent} from "src/shared/util";
+import "__tests__/helpers/mock-console";
 
 describe("Instance properties", () => {
   it("$data", () => {
@@ -89,6 +90,7 @@ describe("Instance properties", () => {
   //   }).$mount()
   //   expect(calls).toEqual(['outer:undefined', 'middle:outer', 'inner:middle', 'next:undefined'])
   // });
+
   it("$props", done => {
     const Comp = Vue.extend({
       props: {
@@ -109,7 +111,9 @@ describe("Instance properties", () => {
     expect(vm.$el.textContent).toContain("foo foo");
     // warn set
     vm.$props = {};
-    // expect('$props is readonly').toHaveBeenWarned()
+    expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
+      "$props is readonly"
+    );
     // check existence
     expect((vm.$props as any).msg).toBe("foo");
     // check change
@@ -144,7 +148,7 @@ describe("Instance properties", () => {
         foo: {
           props: {
             bar: {
-              type: [String]
+              type: [Number]
             }
           },
           render(h) {
@@ -161,18 +165,22 @@ describe("Instance properties", () => {
       expect(vm.$el.children[0].hasAttribute("bar")).toBe(false);
     }).then(done);
   });
-  // it("$attrs should not be undefined when no props passed in", () => {
-  //   const vm = new Vue({
-  //     template: `<foo ref="foo" />`,
-  //     data: { foo: 'foo' },
-  //     components: {
-  //       foo: {
-  //         template: `<div>foo</div>`
-  //       }
-  //     }
-  //   }).$mount()
-  //   expect(vm.$refs.foo.$attrs).toBeDefined()
-  // });
+  it("$attrs should not be undefined when no props passed in", () => {
+    const vm = new Vue({
+      render(h) {
+        return h("foo");
+      },
+      data: {foo: "foo"},
+      components: {
+        foo: {
+          render(h) {
+            return h("div", {}, "foo");
+          }
+        }
+      }
+    }).$mount();
+    expect(vm.$children[0].$attrs).toBeDefined();
+  });
   it("warn mutating $attrs", () => {});
   it("$listener", done => {
     const spyA = jest.fn();
@@ -191,7 +199,6 @@ describe("Instance properties", () => {
       }
     }).$mount();
 
-    // has to be in dom for test to pass in IE
     document.body.appendChild(vm.$el);
 
     triggerEvent(vm.$el as HTMLElement, "click");

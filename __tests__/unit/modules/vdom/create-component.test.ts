@@ -1,6 +1,7 @@
 import Vue from "src";
 import {createComponent} from "src/core/vdom/create-component";
 import {createEmptyVNode} from "src/core/vdom/VNode";
+import "__tests__/helpers/mock-console";
 
 describe("create-component", () => {
   let vm;
@@ -144,6 +145,9 @@ describe("create-component", () => {
 
   it("not create a component when specified with falsy", () => {
     const vnode = createComponent(null, vm, "");
+    expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
+      "Invalid Component definition"
+    );
     expect(vnode).toEqual(createEmptyVNode());
   });
 });

@@ -41,8 +41,6 @@ describe("Options data", () => {
     });
 
     it("merge the same key recursively", () => {
-      type ab = {a?: any; b?: any};
-
       const WithObject = Vue.extend({
         data() {
           return {
@@ -71,7 +69,9 @@ describe("Options data", () => {
           type: [Number]
         }
       },
-      // render() { },
+      render(h) {
+        return h("div");
+      },
       data() {
         return {
           b: this.a

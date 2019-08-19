@@ -16,7 +16,7 @@ export function validateProp(
   }, false);
 
   if (!isValid) {
-    warn("Props validation failed: ${key}", value, vm);
+    warn(`Props validation failed: ${key}`, undefined, vm);
   }
 
   return value;
