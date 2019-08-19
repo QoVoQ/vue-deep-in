@@ -50,7 +50,7 @@
 
 - [ ] Component
   - [x] basic
-  - [ ] slot
+  - [] slot
   - [ ] scoped-slot
   - [ ] Keep-alive
   - [ ] functional
@@ -59,9 +59,16 @@
 
 - [ ] Filter
 - [ ] Directive
+- [ ] Transition
+  - [ ] Involve vnode hook `remove`
 
 - [ ] Util
   - [x] nextTick
+
+- [ ] Error Handling
+  - [ ] Vue.config.errorHandle
+  - [ ] RenderError
+  - [ ] Vue.prototype.errorCapture
 
 - [ ] Global-API
   - [x] Vue.extend
