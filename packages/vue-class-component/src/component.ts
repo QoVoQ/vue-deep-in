@@ -56,9 +56,9 @@ import {ComponentLifecycleName} from "src/core/instance/lifecycle";
 
 export const $innerHooks = ["data", ...Object.keys(ComponentLifecycleName)];
 export function componentFactory(
-  Ctor: VueClass,
+  Ctor: VueClass<Vue>,
   options: Partial<ICtorUserOpt> = {}
-): VueClass {
+): VueClass<Vue> {
   options.name =
     options.name || (Ctor as any)._componentTag || (Ctor as any).name;
   const ctorProto = Ctor.prototype;

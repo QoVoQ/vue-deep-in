@@ -1,7 +1,7 @@
 import {VueClass} from "./definitions";
 import Vue from "src";
 
-export function collectDataFromCtor(vm: Vue, Ctor: VueClass) {
+export function collectDataFromCtor(vm: Vue, Ctor: VueClass<Vue>) {
   const originalInit = Ctor.prototype._init;
   Ctor.prototype._init = function(this: Vue) {
     const keys = Object.getOwnPropertyNames(vm).filter(

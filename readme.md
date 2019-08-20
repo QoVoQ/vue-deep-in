@@ -50,7 +50,7 @@
 
 - [ ] Component
   - [x] basic
-  - [] slot
+  - [x] slot
   - [ ] scoped-slot
   - [ ] Keep-alive
   - [ ] functional
