@@ -83,8 +83,7 @@ export function createComponent(
   const listeners = data.on;
   data.on = data.nativeOn;
 
-  const ctorName = Ctor.options.name;
-  const tagName = `vue-component-${Ctor.cid}${ctorName ? "-" + ctorName : ""}`;
+  const tagName = `vue-component-${Ctor.cid}-${tag || Ctor.options.name}`;
   return new VNode(tagName, data, undefined, undefined, undefined, context, {
     Ctor,
     children,

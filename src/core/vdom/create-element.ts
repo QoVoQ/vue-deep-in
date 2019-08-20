@@ -69,17 +69,19 @@ export function createElement(
 //   }
 // }
 
-export function normalizeChildren(children: any[]): VNode[] {
-  return Array.isArray(children)
-    ? children.reduce((acc, cur) => {
-        if (Array.isArray(cur)) {
-          return acc.concat(normalizeChildren(cur));
-        } else {
-          const vnode = cur instanceof VNode ? cur : createTextVNode(cur);
-          return acc.concat(vnode);
-        }
-      }, [])
-    : isDef(children)
-    ? [createTextVNode(children)]
-    : [];
+export function normalizeChildren(children: any[] | any): VNode[] {
+  if (Array.isArray(children)) {
+    return children.reduce((acc, cur) => {
+      if (Array.isArray(cur)) {
+        return acc.concat(normalizeChildren(cur));
+      } else {
+        const vnode = cur instanceof VNode ? cur : createTextVNode(cur);
+        return acc.concat(vnode);
+      }
+    }, []);
+  } else if (isDef(children)) {
+    return children instanceof VNode ? [children] : [createTextVNode(children)];
+  } else {
+    return [];
+  }
 }

@@ -1,5 +1,6 @@
 import {VNode} from "src/core/vdom/VNode";
 import {Component} from "src";
+import {isDef} from "src/shared/util";
 
 export type SlotsMap = {[key: string]: VNode[]} | {};
 export function resolveSlot(
@@ -15,11 +16,16 @@ export function resolveSlot(
    */
   renderChildren.forEach(child => {
     const childData = child.data;
-    if (child.context === parentCtx) {
-      const slotName = childData.slot || "default";
-      res[slotName] = res[slotName] || [];
-      res[slotName].push(child);
+    let slotName: string | number = "default";
+    if (
+      child.context === parentCtx &&
+      isDef(childData) &&
+      isDef(childData.slot)
+    ) {
+      slotName = childData.slot;
     }
+    res[slotName] = res[slotName] || [];
+    res[slotName].push(child);
   });
 
   return res;

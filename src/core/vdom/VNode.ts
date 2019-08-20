@@ -43,7 +43,8 @@ class VNode {
       vnode.children && vnode.children.slice(),
       vnode.text,
       vnode.elm,
-      vnode.context
+      vnode.context,
+      vnode.componentOptions
     );
     cloned.key = vnode.key;
     cloned.isComment = vnode.isComment;

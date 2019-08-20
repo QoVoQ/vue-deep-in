@@ -31,5 +31,5 @@ export interface IVNodeData {
     [key: string]: Function;
   };
   pendingInsert?: VNode[];
-  slot?: string;
+  slot?: string | number;
 }

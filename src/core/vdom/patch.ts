@@ -145,6 +145,7 @@ export function createPatchFunction(backend: {
       // potential patch errors down the road when it's used as an insertion
       // reference node. Instead, we clone the node on-demand before creating
       // associated DOM element for it.
+      // @TODO don't know why
       vnode = ownerArray[index] = vnode.clone();
     }
 

@@ -1,4 +1,4 @@
-import {VNode, createTextVNode} from "../vdom/VNode";
+import {VNode, createTextVNode, createEmptyVNode} from "../vdom/VNode";
 import {VNodeOn} from "../vdom/definition";
 
 type renderFunction = (c: I$createElement) => VNode | VNode[];
@@ -58,6 +58,8 @@ interface ICtorOptions extends ICtorUserOpt, IInternalComponentOptions {
 interface IRenderHelpers {
   _t: typeof renderSlot;
   _v: typeof createTextVNode;
+  _e: typeof createEmptyVNode;
+  _l: typeof renderList;
 }
 type Component = Vue;
 
@@ -91,6 +93,7 @@ import {ctorMixin} from "../global-api/mixin";
 import {SlotsMap} from "./render-helpers/resolve-slot";
 import {renderSlot} from "./render-helpers/render-slot";
 import {installRenderHelperFn} from "./render-helpers";
+import {renderList} from "./render-helpers/render-list";
 
 class Vue implements IRenderHelpers {
   static extend = ctorExtend;
@@ -193,6 +196,9 @@ class Vue implements IRenderHelpers {
   _t: typeof renderSlot;
 
   _v: typeof createTextVNode;
+  _e: typeof createEmptyVNode;
+
+  _l: typeof renderList;
 }
 installRenderHelperFn(Vue);
 initMixin(Vue);
@@ -208,5 +214,6 @@ export {
   ICtorUserOpt,
   ICtorOptions,
   propsOptions,
-  IInternalComponentOptions
+  IInternalComponentOptions,
+  renderFunction
 };
