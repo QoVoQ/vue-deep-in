@@ -151,9 +151,7 @@ export function updateChildComponent(
   parentVnode: VNode,
   renderChildren?: Array<VNode>
 ) {
-  const needsForceUpdate = !!(
-    renderChildren || vm.$options._renderChildren // has new slot
-  ); // has old slot
+  const needsForceUpdate = !!(renderChildren || vm.$options._renderChildren); // has new slot // has old slot
   vm.$options._parentVnode = parentVnode;
   vm.$vnode = parentVnode; // update vm's placeholder node without re-render
 
@@ -192,6 +190,8 @@ export function updateChildComponent(
   updateComponentListeners(vm, listeners, oldListeners);
   if (needsForceUpdate) {
     vm.$slots = resolveSlot(renderChildren, parentVnode.context);
+    vm.$scopedSlots =
+      (parentVnode && parentVnode.data && parentVnode.data.scopedSlots) || {};
     // @todo why? any necessity?
     vm.$forceUpdate();
   }

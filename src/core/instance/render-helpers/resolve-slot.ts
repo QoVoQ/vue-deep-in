@@ -3,6 +3,7 @@ import {Component} from "src";
 import {isDef} from "src/shared/util";
 
 export type SlotsMap = {[key: string]: VNode[]} | {};
+export type ScopedSlotMap = {[key: string]: (attrs: any) => VNode | VNode[]};
 export function resolveSlot(
   renderChildren?: VNode[],
   parentCtx?: Component

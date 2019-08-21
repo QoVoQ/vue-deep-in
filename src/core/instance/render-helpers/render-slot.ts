@@ -5,7 +5,13 @@ import {normalizeChildren} from "src/core/vdom/create-element";
 export function renderSlot(
   this: Vue,
   slotName: string | number,
-  slotChildren?: any[]
+  slotChildren?: any[], // default content
+  bindAttrs?: any
 ): VNode[] {
-  return this.$slots[slotName] || normalizeChildren(slotChildren);
+  if (this.$scopedSlots[slotName]) {
+    const params = {...bindAttrs};
+    return normalizeChildren(this.$scopedSlots[slotName].call(this, params));
+  } else {
+    return this.$slots[slotName] || normalizeChildren(slotChildren);
+  }
 }

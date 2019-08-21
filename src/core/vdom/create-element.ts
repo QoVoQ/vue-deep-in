@@ -16,6 +16,13 @@ export function createElement(
     return createEmptyVNode();
   }
 
+  // support single function children as default scoped slot
+  if (Array.isArray(children) && typeof children[0] === "function") {
+    data = data || {};
+    data.scopedSlots = {...data.scopedSlots, default: children[0]};
+    children.length = 0;
+  }
+
   let vnode: VNode, Ctor: Partial<ICtorUserOpt> | typeof Vue;
   if (typeof tag === "string") {
     if ((Ctor = context.$options.components[tag])) {

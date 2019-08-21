@@ -12,16 +12,13 @@ export function vueProto$nextTick(fn?: Function) {
 
 export function vueProto_render(): VNode {
   const vm: Component = this;
-  const {render, _parentVnode, _renderChildren} = vm.$options;
+  const {render, _parentVnode} = vm.$options;
 
   // set parent vnode. this allows render functions to have access
   // to the data on the placeholder node.
   // like vnode tag <component-son-1 />
   vm.$vnode = _parentVnode;
-  this.$slots = resolveSlot(
-    _renderChildren,
-    _parentVnode && _parentVnode.context
-  );
+
   // render self
   let vnode;
   try {
@@ -62,6 +59,12 @@ export function initRender(vm: Component) {
   const options = vm.$options;
   const parentVnode = (vm.$vnode = options._parentVnode); // the placeholder node in parent tree
 
+  vm.$slots = resolveSlot(
+    options._renderChildren,
+    parentVnode && parentVnode.context
+  );
+  vm.$scopedSlots =
+    (parentVnode && parentVnode.data && parentVnode.data.scopedSlots) || {};
   const renderFn: I$createElement = (a, b, c?) => createElement(vm, a, b, c);
   vm.$createElement = renderFn;
 

@@ -1,6 +1,7 @@
 import {Component} from "../instance";
 import {VNode} from "./VNode";
 import {DOMClass} from "src/web/util/class";
+import {ScopedSlotMap} from "../instance/render-helpers/resolve-slot";
 
 export interface IComponentOptions {
   Ctor: new (...args) => Component;
@@ -32,4 +33,5 @@ export interface IVNodeData {
   };
   pendingInsert?: VNode[];
   slot?: string | number;
+  scopedSlots?: ScopedSlotMap;
 }

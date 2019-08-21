@@ -90,7 +90,7 @@ import {vueProto$mount, vueProto__patch__} from "src/web/runtime";
 import {warn} from "src/shared/debug";
 import {ctorExtend} from "../global-api/extend";
 import {ctorMixin} from "../global-api/mixin";
-import {SlotsMap} from "./render-helpers/resolve-slot";
+import {SlotsMap, ScopedSlotMap} from "./render-helpers/resolve-slot";
 import {renderSlot} from "./render-helpers/render-slot";
 import {installRenderHelperFn} from "./render-helpers";
 import {renderList} from "./render-helpers/render-list";
@@ -162,6 +162,8 @@ class Vue implements IRenderHelpers {
   $vnode?: VNode;
 
   $slots?: SlotsMap;
+
+  $scopedSlots?: ScopedSlotMap;
   _props: {};
   _computedWatchers: {[key: string]: Watcher};
 

@@ -24,7 +24,7 @@
       - [x] DOM events
       - [x] DOM properties & DOM attributions(Frankly, I am confused about the differences)
 
-- [ ] Vue Instance
+- [**x**] Vue Instance
   - [x] Lifecycle
     - [x] beforeCreate,create,beforeMount,mounted,beforeUpdate,updated,beforeDestroy,destroyed
     - [x] Vue.prototype._update
@@ -52,6 +52,8 @@
   - [x] basic
   - [x] slot
   - [ ] scoped-slot
+    - [x] static slot name
+    - [ ] dynamic slot name
   - [ ] Keep-alive
   - [ ] functional
   - [ ] custom directive
