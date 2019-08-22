@@ -139,6 +139,28 @@ function arrayRemove(arr: any[], selector: any | Function) {
 function waitForUpdate(cb: (val: any) => void): Promise<any> {
   return Promise.resolve().then(cb);
 }
+type nestTypeIfKeyExist<T, K> = K extends keyof T ? T[K] : T;
+function getByPath<
+  T0,
+  K1 extends keyof T0,
+  T1 extends nestTypeIfKeyExist<T0, K1>,
+  K2 extends keyof T1,
+  T2 extends nestTypeIfKeyExist<T1, K2>,
+  K3 extends keyof T2,
+  T3 extends nestTypeIfKeyExist<T2, K3>,
+  K4 extends keyof T3,
+  T4 extends nestTypeIfKeyExist<T3, K4>,
+  K5 extends keyof T4,
+  T5 extends nestTypeIfKeyExist<T4, K5>,
+  K6 extends keyof T5
+>(target: T0, path: [K1?, K2?, K3?, K4?, K5?, K6?]) {
+  let i = 0,
+    res: any = target;
+  while (i < path.length && res != undefined) {
+    res = res[path[i++]];
+  }
+  return res;
+}
 export {
   arrayRemove,
   makeMap,
@@ -151,5 +173,6 @@ export {
   hasOwn,
   toObject,
   waitForUpdate,
-  triggerEvent
+  triggerEvent,
+  getByPath
 };

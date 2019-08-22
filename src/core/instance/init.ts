@@ -8,7 +8,6 @@ import {initEvents} from "./events";
 import {initLifecycle, callHook, ComponentLifecycleName} from "./lifecycle";
 import {initRender} from "./render";
 import {initState} from "./state";
-import {isDef} from "src/shared/util";
 import {mergeOptions} from "../util/options";
 
 let uid = 0;

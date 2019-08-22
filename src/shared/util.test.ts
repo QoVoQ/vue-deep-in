@@ -7,8 +7,64 @@ import {
   isPrimitive,
   camelize,
   arrayRemove,
-  hasOwn
+  hasOwn,
+  getByPath
 } from "./util";
+
+describe("shared/util.getByPath", () => {
+  interface People {
+    name?: string;
+    age: number;
+    hobby?: string;
+    address?: {
+      road?: string;
+      code: number;
+    };
+    major: {
+      name: string;
+      department?: string;
+    };
+    isBold: boolean;
+    ball: number;
+    emptyStr: string;
+    room: null;
+    ud: undefined;
+  }
+  const Tom: People = {
+    name: "Tom",
+    age: 22,
+    major: {
+      name: "Math",
+      department: "Engineering"
+    },
+    isBold: false,
+    ball: 0,
+    emptyStr: "",
+    room: null,
+    ud: undefined
+  };
+  it("should accept undefined/null", () => {
+    expect(getByPath(undefined, [])).toBeUndefined();
+    expect(getByPath(null, [])).toBeNull();
+  });
+  it("should get deep property", () => {
+    expect(getByPath(Tom, ["age"])).toBe(Tom.age);
+    expect(getByPath(Tom, ["hobby"])).toBeUndefined();
+    expect(getByPath(Tom, ["major"])).toEqual({
+      name: "Math",
+      department: "Engineering"
+    });
+    expect(getByPath(Tom, ["address"])).toBeUndefined();
+    expect(getByPath(Tom, ["major", "department"])).toBe("Engineering");
+  });
+  it("should get falsy value", () => {
+    expect(getByPath(Tom, ["isBold"])).toBe(false);
+    expect(getByPath(Tom, ["ball"])).toBe(0);
+    expect(getByPath(Tom, ["emptyStr"])).toBe("");
+    expect(getByPath(Tom, ["ud"])).toBe(undefined);
+    expect(getByPath(Tom, ["room"])).toBeNull();
+  });
+});
 
 describe("shared/util.def", () => {
   const key = "name";
