@@ -1,5 +1,5 @@
 import Vue, {Component, propsOptions} from ".";
-import {noop, isPlainObject} from "src/shared/util";
+import {noop, isPlainObject, getByPath} from "src/shared/util";
 import {
   observe,
   defineReactivity,
@@ -214,7 +214,7 @@ export function defineComputed(target: any, key: string, userDef: Function) {
 function createComputedGetter(key) {
   return function computedGetter() {
     const vm: Component = this;
-    const watcher = vm._computedWatchers && vm._computedWatchers[key];
+    const watcher = getByPath(vm, ["_computedWatchers", key]);
     if (watcher) {
       if (watcher.dirty) {
         watcher.evaluate();

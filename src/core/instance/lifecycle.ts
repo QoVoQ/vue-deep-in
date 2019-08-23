@@ -1,7 +1,7 @@
 import Vue, {Component} from ".";
 import {invokeWithErrorHandler} from "../util/error";
 import {VNode} from "../vdom/VNode";
-import {remove, noop, isDef} from "src/shared/util";
+import {remove, noop, isDef, getByPath} from "src/shared/util";
 import {Watcher} from "../reactivity/Watcher";
 import {pushTarget, popTarget, toggleObserving} from "../reactivity";
 import {updateComponentListeners} from "./events";
@@ -190,8 +190,7 @@ export function updateChildComponent(
   updateComponentListeners(vm, listeners, oldListeners);
   if (needsForceUpdate) {
     vm.$slots = resolveSlot(renderChildren, parentVnode.context);
-    vm.$scopedSlots =
-      (parentVnode && parentVnode.data && parentVnode.data.scopedSlots) || {};
+    vm.$scopedSlots = getByPath(parentVnode, ["data", "scopedSlots"]) || {};
     // @todo why? any necessity?
     vm.$forceUpdate();
   }

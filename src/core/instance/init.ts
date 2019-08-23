@@ -9,6 +9,7 @@ import {initLifecycle, callHook, ComponentLifecycleName} from "./lifecycle";
 import {initRender} from "./render";
 import {initState} from "./state";
 import {mergeOptions} from "../util/options";
+import {getByPath} from "src/shared/util";
 
 let uid = 0;
 export const vueProto_init = function(opt?: Partial<ICtorOptions>) {
@@ -16,7 +17,7 @@ export const vueProto_init = function(opt?: Partial<ICtorOptions>) {
   vm._isVue = true;
   vm._uid = uid++;
 
-  if (opt && opt._isComponent) {
+  if (getByPath(opt, ["_isComponent"])) {
     initInternalComponent(vm, opt as IInternalComponentOptions);
   } else {
     vm.$options = mergeOptions(

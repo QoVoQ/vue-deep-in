@@ -5,6 +5,7 @@ import {createElement} from "../vdom/create-element";
 import {defineReactivity} from "../reactivity";
 import {nextTick} from "../util/next-tick";
 import {resolveSlot} from "./render-helpers/resolve-slot";
+import {getByPath} from "src/shared/util";
 
 export function vueProto$nextTick(fn?: Function) {
   return nextTick(fn, this);
@@ -61,17 +62,16 @@ export function initRender(vm: Component) {
 
   vm.$slots = resolveSlot(
     options._renderChildren,
-    parentVnode && parentVnode.context
+    getByPath(parentVnode, ["context"])
   );
-  vm.$scopedSlots =
-    (parentVnode && parentVnode.data && parentVnode.data.scopedSlots) || {};
+  vm.$scopedSlots = getByPath(parentVnode, ["data", "scopedSlots"]) || {};
   const renderFn: I$createElement = (a, b, c?) => createElement(vm, a, b, c);
   vm.$createElement = renderFn;
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOC using them are always updated
-  const parentData = parentVnode && parentVnode.data;
+  const parentData = getByPath(parentVnode, ["data"]);
 
-  defineReactivity(vm, "$attrs", (parentData && parentData.attrs) || {});
+  defineReactivity(vm, "$attrs", getByPath(parentData, ["attrs"]) || {});
   defineReactivity(vm, "$listeners", options._parentListeners || {});
 }

@@ -1,6 +1,12 @@
 import {Dep} from "./Dep";
 import {augmentArray} from "./array-augment";
-import {def, hasOwn, isPrimitive, isPlainObject} from "src/shared/util";
+import {
+  def,
+  hasOwn,
+  isPrimitive,
+  isPlainObject,
+  getByPath
+} from "src/shared/util";
 import {isObject} from "util";
 import {VNode} from "../vdom/VNode";
 
@@ -112,8 +118,9 @@ function observeArray(val) {
 }
 
 function dependArray(arr: Array<any>) {
-  arr.forEach(ele => {
-    ele && ele.__ob__ && ele.__ob__.dep.depend();
+  arr.forEach((ele: IObserved) => {
+    const dependFn = getByPath(ele, ["__ob__", "dep", "depend"]);
+    dependFn && ele.__ob__.dep.depend();
     if (Array.isArray(ele)) {
       dependArray(ele);
     }
