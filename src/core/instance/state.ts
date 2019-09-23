@@ -80,10 +80,10 @@ function initProps(vm: Component, propsOpt: propsOptions) {
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = (vm.$options._propKeys = []);
-  if (!vm.$parent) {
-    // isRoot instance
-    // @TODO why
-    // seems every time when updating props, it calls
+  if (vm.$parent) {
+    //  none root instance
+    // propsData is pass from parent state, which is already observed
+    // no need to recursively obverse again
     toggleObserving(false);
   }
   for (const key in propsOpt) {

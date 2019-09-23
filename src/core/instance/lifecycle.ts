@@ -170,6 +170,8 @@ export function updateChildComponent(
 
   // update props
   if (propsData && vm.$options.props) {
+    // propsData is pass from parent state, which is already observed
+    // no need to recursively obverse again
     toggleObserving(false);
     const props = vm._props;
     const propKeys = vm.$options._propKeys || [];
