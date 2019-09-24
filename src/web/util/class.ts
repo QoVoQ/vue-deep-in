@@ -20,7 +20,9 @@ export function genClassForVnode(vnode: VNode): string {
   let data = vnode.data;
   let parentNode = vnode;
   let childNode = vnode;
-  // @TODO don't know why
+  // @TODO merge class from parent vm and child vm, will this process take place
+  // when its parent vm or child vm get update at the same time.
+  // if so, they are useless calculation
   while (isDef(childNode.componentInstance)) {
     childNode = childNode.componentInstance._vnode;
     if (childNode && childNode.data) {

@@ -20,6 +20,8 @@ export const vueProto_init = function(opt?: Partial<ICtorOptions>) {
   if (getByPath(opt, ["_isComponent"])) {
     initInternalComponent(vm, opt as IInternalComponentOptions);
   } else {
+    // merge options from `init`'s param and vm's constructor
+    // vm's constructor is created by Vue.extend and use `Ctor.options` to inherit behavior
     vm.$options = mergeOptions(
       resolveCtorOptions(Object.getPrototypeOf(vm).constructor),
       opt || {},
@@ -50,6 +52,9 @@ function resolveCtorOptions(Ctor: typeof Vue): Partial<ICtorUserOpt> {
   return Ctor.options || {};
 }
 
+/**
+ * Get params(such as parentVm, parentVnode, propsData, listeners, children) that a child vm needs for instantiation
+ */
 function initInternalComponent(
   vm: Component,
   options: IInternalComponentOptions

@@ -177,7 +177,7 @@ const computedWatcherOptions = {lazy: true};
 // })
 type ComputedFnMap = {[key: string]: Function};
 function initComputed(vm: Component, computed: ComputedFnMap) {
-  const watchers = (vm._computedWatchers = Object.create(null));
+  const watchers: { [key: string]: Watcher } = (vm._computedWatchers = Object.create(null));
 
   for (const key in computed) {
     const getter = computed[key].bind(vm);
@@ -214,7 +214,7 @@ export function defineComputed(target: any, key: string, userDef: Function) {
 function createComputedGetter(key) {
   return function computedGetter() {
     const vm: Component = this;
-    const watcher = getByPath(vm, ["_computedWatchers", key]);
+    const watcher: Watcher = getByPath(vm, ["_computedWatchers", key]);
     if (watcher) {
       if (watcher.dirty) {
         watcher.evaluate();

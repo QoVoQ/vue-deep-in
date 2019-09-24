@@ -22,7 +22,6 @@ export function normalizeStyleBinding(bindingStyle) {
 export function getStyle(vnode: VNode, checkChild: boolean): Object {
   const res = {};
   let styleData;
-  // @TODO don't know why, may be related to component mechanism
   if (checkChild) {
     let childNode = vnode;
     while (childNode.componentInstance) {

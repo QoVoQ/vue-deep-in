@@ -37,7 +37,6 @@ function updateStyle(oldVnode: VNode, vnode: VNode) {
     ? Object.assign({}, style)
     : style;
 
-  // @TODO why only call `getStyle` on new style, but not old style?
   const newStyle = getStyle(vnode, true);
 
   // remove old style

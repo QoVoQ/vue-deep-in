@@ -45,7 +45,9 @@ export const vueProto_update = function(vnode: VNode) {
   }
   restoreActiveInstance();
 
-  // @TODO don't know why
+  // HOC- higher order components are those components who is especially used to enhance
+  // other component's feature
+  // https://medium.com/bethink-pl/higher-order-components-in-vue-js-a79951ac9176
   // if parent is an HOC, update its $el as well
   if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
     vm.$parent.$el = vm.$el;
@@ -156,10 +158,10 @@ export function updateChildComponent(
   vm.$vnode = parentVnode; // update vm's placeholder node without re-render
 
   if (vm._vnode) {
-    // update child tree's parent
+    // update child tree's parentVnode
     vm._vnode.parent = parentVnode;
   }
-  // related to slot
+  // update slot content
   vm.$options._renderChildren = renderChildren;
 
   // update $attrs and $listeners hash

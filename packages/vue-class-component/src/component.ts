@@ -1,6 +1,5 @@
-import Vue, {ICtorUserOpt, ICtorOptions} from "src";
+import Vue, {ICtorUserOpt} from "src";
 import {VueClass} from "./definitions";
-import {mergeOptions} from "src/core/util/options";
 import {collectDataFromCtor} from "./data";
 import {ComponentLifecycleName} from "src/core/instance/lifecycle";
 

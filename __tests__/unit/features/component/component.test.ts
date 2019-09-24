@@ -106,7 +106,6 @@ describe("Component", () => {
         expect(vm.$el.tagName).toBe("P");
         expect(vm.$el.id).toBe("foo");
         expect(vm.$el.className).toBe("test green");
-        debugger;
         (vm as any).color = "red";
       })
       .then(() => {

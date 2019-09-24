@@ -77,7 +77,7 @@ export function queueWatcher(watcher: Watcher) {
   } else {
     /**
      * watchers in queue has already been sorted in ascending order
-     * i. If uid of the newly watcher being pushed is greater than the uid of
+     * i. If uid of the newly watcher being pushed is smaller than the uid of
      *    running watcher, the newly one will be executed next immediately
      * ii. Else, insert the newly watcher into queue according to its uid
      */

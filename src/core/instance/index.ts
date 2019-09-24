@@ -159,6 +159,7 @@ class Vue implements IRenderHelpers {
 
   $root?: Component;
 
+  // parent placeholder vnode
   $vnode?: VNode;
 
   $slots?: SlotsMap;

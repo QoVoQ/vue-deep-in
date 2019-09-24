@@ -457,6 +457,7 @@ export function createPatchFunction(backend: {
         // patch existing root node
         patchVnode(preVnode, vnode, insertedVnodeQueue, null, null);
       } else {
+        // isRealElement || newVnode & oldVnode is different
         if (isRealElement) {
           // mounting to a real element
 
@@ -475,7 +476,9 @@ export function createPatchFunction(backend: {
           nodeOps.nextSibling(oldElm)
         );
 
+        // child component's root HTMLElement changed,
         // update parent placeholder node element, recursively
+        // Updates that take place here are special, they happens from bottom to top
         if (isDef(vnode.parent)) {
           let ancestor = vnode.parent;
           const patchable = isPatchable(vnode);
